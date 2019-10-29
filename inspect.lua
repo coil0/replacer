@@ -66,7 +66,7 @@ replacer.inspect = function( itemstack, user, pointed_thing, mode, show_receipe 
 		local text = 'This is ';
 		local ref = pointed_thing.ref;
 		if( not( ref )) then
-			text = text..'a borken object. We have no further information about it. It is located';
+			text = text..'a broken object. We have no further information about it. It is located';
 		elseif( ref:is_player()) then
 			text = text..'your fellow player \"'..tostring( ref:get_player_name() )..'\"';
 		else
