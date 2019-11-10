@@ -18,7 +18,7 @@
 
 -- Version 3.0
 
--- Changelog: 
+-- Changelog:
 -- 09.12.2017 * Got rid of outdated minetest.env
 --            * Fixed error in protection function.
 --            * Fixed minor bugs.
@@ -36,7 +36,7 @@
 --			* inventory image added
 
 local path = minetest.get_modpath("replacer")
-    
+
 -- adds a function to check ownership of a node; taken from VanessaEs homedecor mod
 dofile(path.."/check_owner.lua")
 
@@ -115,14 +115,14 @@ minetest.register_tool("replacer:replacer", {
 		if not placer
 		or not pt then
 			return
-	end
+		end
 
 		local keys = placer:get_player_control()
 		local name = placer:get_player_name()
 		local creative_enabled = creative.is_enabled_for(name)
 		local has_give = minetest.check_player_privs(name, "give")
 		local modes_available = has_give or creative_enabled
-    
+
 		if keys.aux1
 		and modes_available then
 			-- Change Mode when holding the fast key
@@ -142,14 +142,14 @@ minetest.register_tool("replacer:replacer", {
 		if pt.type ~= "node" then
 			inform(name, "Error: No node selected.")
 			return
-	end
+		end
 
 		local node, mode = get_data(itemstack)
 		node = minetest.get_node_or_nil(pt.under) or node
-       
+
 		if not modes_available then
 			mode = "single"
-	end
+		end
 
 		local inv = placer:get_inventory()
 		if not (creative_enabled and has_give)
@@ -248,7 +248,7 @@ local function replaceable(pos, name, pname)
 	return get_node(pos).name == name
 		and not minetest.is_protected(pos, pname)
 end
- 
+
 local trans_nodes = {}
 local function node_translucent(name)
 	if trans_nodes[name] ~= nil then
@@ -269,7 +269,7 @@ local function field_position(pos, data)
 		and node_translucent(
 			get_node(vector.add(data.above, pos)).name) ~= data.right_clicked
 end
-       
+
 local offsets_touch = {
 	{x=-1, y=0, z=0},
 	{x=1, y=0, z=0},
@@ -476,7 +476,7 @@ local function replace_single_node(pos, node, nnd, player, name, inv, creative)
 	if succ == false then
 		return false, "Couldn't place '" .. nnd.name .. "'."
 	end
- 
+
 	-- update inventory in survival mode
 	if not creative then
 		-- consume the item
@@ -494,7 +494,7 @@ local function replace_single_node(pos, node, nnd, player, name, inv, creative)
 		-- e.g. when placing snow on snow with the snow mod
 		return true
 	end
- 
+
 	-- fix orientation if needed
 	if placed_node.param1 ~= nnd.param1
 	or placed_node.param2 ~= nnd.param2 then
@@ -535,7 +535,7 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 		inform(name, "Nothing to replace.")
 		return
              end
-            
+
 	if replacer.blacklist[nnd.name] then
 		minetest.chat_send_player(name, "Placing blocks of the type '" ..
 			nnd.name ..
