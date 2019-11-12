@@ -55,6 +55,9 @@ replacer.blacklist[ "tnt:tnt"] = true;
 replacer.blacklist[ "protector:protect"] = true;
 replacer.blacklist[ "protector:protect2"] = true;
 
+replacer.max_charge = 30000
+replacer.charge_per_node = 10
+
 -- adds a tool for inspecting nodes and entities
 dofile(path.."/inspect.lua")
 
@@ -99,14 +102,17 @@ local function set_data(stack, node, mode)
 	local meta = stack:get_meta()
 	meta:set_string("replacer", metadata)
 	meta:set_string("color", mode_colours[mode])
-	stack:set_metadata(metadata)
 	return metadata
 end
+
+technic.register_power_tool("replacer:replacer", replacer.max_charge)
 
 minetest.register_tool("replacer:replacer", {
 	description = "Node replacement tool",
 	inventory_image = "replacer_replacer.png",
 	stack_max = 1, -- it has to store information - thus only one can be stacked
+	wear_represents = "technic_RE_charge",
+	on_refill = technic.refill_RE_charge,
 	liquids_pointable = true, -- it is ok to painit in/with water
 	--node_placement_prediction = nil,
 	metadata = "default:dirt", -- default replacement: common dirt
@@ -121,10 +127,8 @@ minetest.register_tool("replacer:replacer", {
 		local name = placer:get_player_name()
 		local creative_enabled = creative.is_enabled_for(name)
 		local has_give = minetest.check_player_privs(name, "give")
-		local modes_available = has_give or creative_enabled
 
-		if keys.aux1
-		and modes_available then
+		if keys.aux1 then
 			-- Change Mode when holding the fast key
 			local node, mode = get_data(itemstack)
 			mode = modes[modes[mode]%#modes+1]
@@ -146,10 +150,6 @@ minetest.register_tool("replacer:replacer", {
 
 		local node, mode = get_data(itemstack)
 		node = minetest.get_node_or_nil(pt.under) or node
-
-		if not modes_available then
-			mode = "single"
-		end
 
 		local inv = placer:get_inventory()
 		if not (creative_enabled and has_give)
@@ -544,11 +544,6 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 		return
 	end
 
-	if not creative_enabled
-	and not minetest.check_player_privs(name, "give") then
-		mode = "single"
-	end
-
 	if mode == "single" then
 		local succ,err = replace_single_node(pos, node_toreplace, nnd, user,
 			name, user:get_inventory(), creative_enabled)
@@ -613,6 +608,14 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 		return
 	end
 
+	local charge_needed = replacer.charge_per_node * num
+	local meta = minetest.deserialize(itemstack:get_metadata())
+	if not meta or not meta.charge
+	or meta.charge < charge_needed then
+		inform(name, "Need " .. charge_needed .. " charge to replace " .. num .. " nodes.")
+		return
+	end
+
 	-- set nodes
 	local inv = user:get_inventory()
 	for i = 1,num do
@@ -621,8 +624,21 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 			user, name, inv, creative_enabled)
 		if not succ then
 			inform(name, err)
+			if not technic.creative_mode then
+				meta.charge = meta.charge - replacer.charge_per_node * i
+				technic.set_RE_wear(itemstack, meta.charge, replacer.max_charge)
+				itemstack:set_metadata(minetest.serialize(meta))
+				return itemstack
+			end
 			return
 		end
+	end
+
+	if not technic.creative_mode then
+		meta.charge = meta.charge - replacer.charge_per_node * num
+		technic.set_RE_wear(itemstack, meta.charge, replacer.max_charge)
+		itemstack:set_metadata(minetest.serialize(meta))
+		return itemstack
 	end
 	inform(name, num.." nodes replaced.")
 end
@@ -630,10 +646,10 @@ end
 
 minetest.register_craft({
 	output = "replacer:replacer",
-        recipe = {
-                { 'default:chest', '',              '' },
-                { '',              'default:stick', '' },
-                { '',              '',              'default:chest' },
-        }
+	recipe = {
+		{'default:chest', '', ''},
+		{'', 'technic:green_energy_crystal', ''},
+		{'', '', 'default:chest'},
+	}
 })
 
