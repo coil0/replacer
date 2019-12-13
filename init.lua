@@ -460,7 +460,7 @@ local function replace_single_node(pos, node, nnd, player, name, inv, creative)
 	-- dig the current node if needed
 	if not ndef.buildable_to then
 		-- give the player the item by simulating digging if possible
-		minetest.node_dig(pos, node, player)
+		ndef.on_dig(pos, node, player)
 		-- test if digging worked
 		local dug_node = minetest.get_node_or_nil(pos)
 		if not dug_node
