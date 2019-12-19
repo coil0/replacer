@@ -5,9 +5,11 @@ It replaces nodes with a previously selected other type of node (i.e. places sai
 into a brick wall).
 
 **Crafting:**
-   chest  -      -  
-            -      stick  -
-            -      -      chest
+```
+      | chest  |                       |        |
+      |        | green energy crystal  |        |
+      |        |                       | chest  |
+```
 Or just use `/giveme replacer:replacer`
 
 **Usage:** Right-click on a node of that type you want to replace other nodes with.
@@ -22,9 +24,12 @@ will be taken from your inventory.
 
 The second tool included in this mod is the inspector.
 
-Crafting:    torch
-             stick
-
+Crafting:
+```
+      | torch |      |     |
+      | stick |      |     |
+      |       |      |     |
+```
 Just wield it and click on any node or entity you want to know more about. A limited craft-guide is included.
 
 
