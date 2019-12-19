@@ -12,15 +12,16 @@ into a brick wall).
 ```
 Or just use `/giveme replacer:replacer`
 
-**Usage:** Right-click on a node of that type you want to replace other nodes with.
-       Left-click (normal usage) on any nodes you want to replace with the type you previously right-clicked on.
-       SHIFT-Right-click in order to store a new pattern.
+**Usage:** Sneak-right-click on a node of which type you want to replace other nodes with.
+       Left-click (normal usage) on any nodes you want to replace with that type. Right-click to place a node of that type onto clicked node.
 
 When in creative mode, the node will just be replaced. Your inventory will not be changed.
 
 When *not* in creative mode, digging will be simulated and you will get what was there. In return, the replacement node
 will be taken from your inventory.
 
+**Modes:**
+Special-right-click to cycle through the modes. Single-mode does not need any charge. The other modes do.
 
 The second tool included in this mod is the inspector.
 
