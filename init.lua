@@ -56,7 +56,7 @@ replacer.blacklist[ "protector:protect"] = true;
 replacer.blacklist[ "protector:protect2"] = true;
 
 replacer.max_charge = 30000
-replacer.charge_per_node = 10
+replacer.charge_per_node = 15
 
 -- adds a tool for inspecting nodes and entities
 dofile(path.."/inspect.lua")
