@@ -554,6 +554,19 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 		return
 	end
 
+	local meta = minetest.deserialize(itemstack:get_metadata())
+	if not meta or not meta.charge
+	or meta.charge < replacer.charge_per_node then
+		inform(name, "Not enough charge to use this mode.")
+		return
+	end
+
+	local max_charge_to_use = math.min(meta.charge, replacer.max_charge)
+	local max_nodes = math.floor(max_charge_to_use / replacer.charge_per_node)
+	if max_nodes > 3168 then
+		max_nodes = 3168
+	end
+
 	local ps,num
 	if mode == "field" then
 		-- get connected positions for plane field replacing
@@ -574,11 +587,11 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 		end
 		right_clicked = right_clicked and true or false
 		ps,num = get_ps(pos, {func=field_position, name=node_toreplace.name,
-			pname=name, above=pdif, right_clicked=right_clicked}, adps, 8799)
+			pname=name, above=pdif, right_clicked=right_clicked}, adps, max_nodes)
 	elseif mode == "crust" then
 		local nodename_clicked = get_node(pt.under).name
 		local aps,n,aboves = get_ps(pt.above, {func=crust_above_position,
-			name=nodename_clicked, pname=name}, nil, 8799)
+			name=nodename_clicked, pname=name}, nil, max_nodes)
 		if aps then
 			if right_clicked then
 				local data = {ps=aps, num=n, name=nodename_clicked, pname=name}
@@ -587,7 +600,7 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 			else
 				ps,num = get_ps(pt.under, {func=crust_under_position,
 					name=node_toreplace.name, pname=name, aboves=aboves},
-					offsets_hollowcube, 8799)
+					offsets_hollowcube, max_nodes)
 				if ps then
 					local data = {aboves=aboves, ps=ps, num=num}
 					reduce_crust_ps(data)
@@ -597,7 +610,7 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 		end
 	elseif mode == "chunkborder" then
 		ps,num = get_ps(pos, {func=mantle_position, name=node_toreplace.name,
-			pname=name}, nil, 8799)
+			pname=name}, nil, max_nodes)
 	end
 
 	-- reset known nodes table
@@ -609,9 +622,7 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 	end
 
 	local charge_needed = replacer.charge_per_node * num
-	local meta = minetest.deserialize(itemstack:get_metadata())
-	if not meta or not meta.charge
-	or meta.charge < charge_needed then
+	if meta.charge < charge_needed then
 		inform(name, "Need " .. charge_needed .. " charge to replace " .. num .. " nodes.")
 		return
 	end
