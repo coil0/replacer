@@ -501,8 +501,8 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 
 	local max_charge_to_use = math.min(meta.charge, replacer.max_charge)
 	local max_nodes = math.floor(max_charge_to_use / replacer.charge_per_node)
-	if max_nodes > 3168 then
-		max_nodes = 3168
+	if max_nodes > replacer.max_nodes then
+		max_nodes = replacer.max_nodes
 	end
 
 	local ps,num

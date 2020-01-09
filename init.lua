@@ -54,6 +54,7 @@ replacer.blacklist[ "protector:protect2"] = true;
 
 replacer.max_charge = 30000
 replacer.charge_per_node = 15
+replacer.max_nodes = tonumber( minetest.settings:get("replacer.max_nodes") or "3168")
 
 -- adds a tool for inspecting nodes and entities
 dofile(path.."/inspect.lua")
