@@ -21,7 +21,7 @@ end
 minetest.register_tool("replacer:inspect",
 {
 	description = "Node inspection tool",
-	groups = {}, 
+	groups = {},
 	inventory_image = "replacer_inspect.png",
 	wield_image = "",
 	wield_scale = {x=1,y=1,z=1},
@@ -37,7 +37,7 @@ minetest.register_tool("replacer:inspect",
 })
 
 
-replacer.inspect = function(itemstack, user, pointed_thing, mode, show_receipe)
+replacer.inspect = function(_, user, pointed_thing, mode, show_receipe)
 
 	if (user == nil or pointed_thing == nil) then
 		return nil
@@ -47,7 +47,7 @@ replacer.inspect = function(itemstack, user, pointed_thing, mode, show_receipe)
 	if (keys["sneak"]) then
 		show_receipe = true
 	end
- 
+
 	if (pointed_thing.type == 'object') then
 		local text = 'This is '
 		local ref = pointed_thing.ref
@@ -66,7 +66,7 @@ replacer.inspect = function(itemstack, user, pointed_thing, mode, show_receipe)
 						text = text..' ['..tostring(sdata.itemstring)..']'
 						if (show_receipe) then
 							-- the fields part is used here to provide additional information about the entity
-							replacer.inspect_show_crafting(name, sdata.itemstring, { pos=pos, luaob=luaob})
+							replacer.inspect_show_crafting(name, sdata.itemstring, { luaob=luaob})
 						end
 					end
 					if (sdata.age) then
@@ -82,23 +82,26 @@ replacer.inspect = function(itemstack, user, pointed_thing, mode, show_receipe)
 		minetest.chat_send_player(name, text)
 		return nil
 	elseif (pointed_thing.type ~= 'node') then
-		minetest.chat_send_player(name, 'Sorry. This is an unkown something of type \"'..tostring(pointed_thing.type)..'\". No information available.')
+		minetest.chat_send_player(name, 'Sorry. This is an unkown something of type \"'..
+			tostring(pointed_thing.type)..'\". No information available.')
 		return nil
 	end
-	
+
 	local pos  = minetest.get_pointed_thing_position(pointed_thing, mode)
 	local node = minetest.get_node_or_nil(pos)
-       
+
 	if (node == nil) then
 		minetest.chat_send_player(name, "Error: Target node not yet loaded. Please wait a moment for the server to catch up.")
 		return nil
 	end
 
-	local text = ' ['..tostring(node.name)..'] with param2='..tostring(node.param2)..' at '..minetest.pos_to_string(pos)..'.'
+	local text = ' ['..tostring(node.name)..'] with param2='..tostring(node.param2)..
+		' at '..minetest.pos_to_string(pos)..'.'
 	if (not(minetest.registered_nodes[node.name])) then
 		text = 'This node is an UNKOWN block'..text
 	else
-		text = 'This is a \"'..tostring(minetest.registered_nodes[node.name].description or ' - no description provided -')..'\" block'..text
+		text = 'This is a \"'..tostring(minetest.registered_nodes[node.name].description or
+		' - no description provided -')..'\" block'..text
 	end
 	local protected_info = ""
 	if (minetest.is_protected(	 pos, name)) then
@@ -109,7 +112,7 @@ replacer.inspect = function(itemstack, user, pointed_thing, mode, show_receipe)
 	text = text..' '..protected_info
 -- no longer spam the chat; the craft guide is more informative
 --	minetest.chat_send_player(name, text)
-	
+
 	if (show_receipe) then
 		-- get light of the node at the current time
 		local light = minetest.get_node_light(pos, nil)
@@ -148,7 +151,7 @@ if (minetest.get_modpath("dye") and dye and dye.basecolors) then
 			replacer.group_placeholder['group:flower,color_'..color] = 'dye:'..color
 		end
 	end
-end 
+end
 
 replacer.image_button_link = function(stack_string)
 	local group = ''
@@ -158,7 +161,7 @@ replacer.image_button_link = function(stack_string)
 	if (replacer.group_placeholder[stack_string]) then
 		stack_string = replacer.group_placeholder[stack_string]
 		group = 'G'
-	end		
+	end
 -- TODO: show information about other groups not handled above
 	local stack = ItemStack(stack_string)
 	local new_node_name = stack_string
@@ -272,7 +275,7 @@ replacer.inspect_show_crafting = function(name, node_name, fields)
 	if (not(desc) or desc=="") then
 		desc = ' - no description provided - '
 	end
-		
+
 	local formspec = "size[6,6]"..
 		"label[0,5.5;This is a "..minetest.formspec_escape(desc)..".]"..
 		"button_exit[5.0,4.3;1,0.5;quit;Exit]"..
@@ -389,12 +392,3 @@ end
 
 -- establish a callback so that input from the player-specific formspec gets handled
 minetest.register_on_player_receive_fields(replacer.form_input_handler)
-
-
-minetest.register_craft({
-        output = 'replacer:inspect',
-        recipe = {
-		{ 'default:torch'},
-		{ 'default:stick'},
-        }
-})
