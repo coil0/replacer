@@ -75,7 +75,7 @@ minetest.register_tool("replacer:replacer", {
 			return itemstack
 		end
 
-		-- If not holding shift, place node(s)
+		-- If not holding sneak key, place node(s)
 		if not keys.sneak then
 			return replacer.replace(itemstack, placer, pt, true)
 		end
