@@ -45,6 +45,7 @@ Just wield it and click on any node or entity you want to know more about. A lim
 
 * Sokomine
 * coil0
+* HybridDog
 * SwissalpS
 * OgelGames
 * BuckarooBanzay
