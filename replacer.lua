@@ -51,19 +51,31 @@ local function get_form_modes(current_mode)
 	-- need feedback from mobile user to know if this is required
 	local formspec = "size[3.9,2]"
 		.. "label[0,0;Choose mode]"
-	if current_mode ~= modes[1] then
-		formspec = formspec .. "button_exit[0.0,0.6;2,0.5;mode;" .. modes[1] .. "]"
+		.. "button_exit[0.0,0.6;2,0.5;"
+	if current_mode == modes[1] then
+		formspec = formspec .. "_;< " .. modes[1] .. " >]"
+	else
+		formspec = formspec .. "mode;" .. modes[1] .. "]"
 	end
-	if current_mode ~= modes[2] then
-		formspec = formspec .. "button_exit[1.9,0.6;2,0.5;mode;" .. modes[2] .. "]"
+	formspec = formspec .. "button_exit[1.9,0.6;2,0.5;"
+	if current_mode == modes[2] then
+		formspec = formspec .. "_;< " .. modes[2] .. " >]"
+	else
+		formspec = formspec .. "mode;" .. modes[2] .. "]"
 	end
-	if current_mode ~= modes[3] then
-		formspec = formspec .. "button_exit[0.0,1.4;2,0.5;mode;" .. modes[3] .. "]"
+	formspec = formspec .. "button_exit[0.0,1.4;2,0.5;"
+	if current_mode == modes[3] then
+		formspec = formspec .. "_;< " .. modes[3] .. " >]"
+	else
+		formspec = formspec .. "mode;" .. modes[3] .. "]"
 	end
 	-- TODO: enable mode when it is available
 	--[[
-	if current_mode ~= modes[4] then
-		formspec = formspec .. "button_exit[1.9,1.4;2,0.5;mode;" .. modes[] .. "]"
+	formspec = formspec .. "button_exit[1.9,1.4;2,0.5;"
+	if current_mode == modes[4] then
+		formspec = formspec .. "_;< " .. modes[4] .. " >]"
+	else
+		formspec = formspec .. "mode;" .. modes[4] .. "]"
 	end
 	--]]
 	return formspec
