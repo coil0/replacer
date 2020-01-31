@@ -35,12 +35,50 @@ local function set_data(stack, node, mode)
 	mode = mode or modes[1]
 	local metadata = (node.name or "default:dirt") .. " "
 		.. (node.param1 or 0) .. " "
-		.. (node.param2 or 0) .." "
+		.. (node.param2 or 0) .. " "
 		.. mode
 	local meta = stack:get_meta()
 	meta:set_string("replacer", metadata)
 	meta:set_string("color", mode_colours[mode])
 	return metadata
+end
+
+local replacer_form_name_modes = "replacer_replacer_mode_change"
+local function get_form_modes(current_mode)
+	-- TODO: possibly add the info here instead of as
+	-- a chat message
+	-- TODO: add close button for mobile users who possibly can't esc
+	-- need feedback from mobile user to know if this is required
+	local formspec = "size[3.9,2]"
+		.. "label[0,0;Choose mode]"
+		.. "button_exit[0.0,0.6;2,0.5;"
+	if current_mode == modes[1] then
+		formspec = formspec .. "_;< " .. modes[1] .. " >]"
+	else
+		formspec = formspec .. "mode;" .. modes[1] .. "]"
+	end
+	formspec = formspec .. "button_exit[1.9,0.6;2,0.5;"
+	if current_mode == modes[2] then
+		formspec = formspec .. "_;< " .. modes[2] .. " >]"
+	else
+		formspec = formspec .. "mode;" .. modes[2] .. "]"
+	end
+	formspec = formspec .. "button_exit[0.0,1.4;2,0.5;"
+	if current_mode == modes[3] then
+		formspec = formspec .. "_;< " .. modes[3] .. " >]"
+	else
+		formspec = formspec .. "mode;" .. modes[3] .. "]"
+	end
+	-- TODO: enable mode when it is available
+	--[[
+	formspec = formspec .. "button_exit[1.9,1.4;2,0.5;"
+	if current_mode == modes[4] then
+		formspec = formspec .. "_;< " .. modes[4] .. " >]"
+	else
+		formspec = formspec .. "mode;" .. modes[4] .. "]"
+	end
+	--]]
+	return formspec
 end
 
 technic.register_power_tool("replacer:replacer", replacer.max_charge)
@@ -66,12 +104,17 @@ minetest.register_tool("replacer:replacer", {
 		local creative_enabled = creative.is_enabled_for(name)
 		local has_give = minetest.check_player_privs(name, "give")
 
+		-- is special-key held? (aka fast-key)
 		if keys.aux1 then
-			-- Change Mode when holding the fast key
+			-- fetch current mode
 			local node, mode = get_data(itemstack)
+			-- increment and roll-over mode
 			mode = modes[modes[mode]%#modes+1]
+			-- update tool
 			set_data(itemstack, node, mode)
-			inform(name, "Mode changed to: "..mode..": "..mode_infos[mode])
+			-- spam chat
+			inform(name, "Mode changed to: " .. mode .. ": " .. mode_infos[mode])
+			-- return changed tool
 			return itemstack
 		end
 
@@ -165,6 +208,31 @@ minetest.register_tool("replacer:replacer", {
 		return replacer.replace(...)
 	end,
 })
+
+local function replacer_register_on_player_receive_fields(player, form_name, fields)
+	-- no need to process if it's not expected formspec that triggered call
+	if form_name ~= replacer_form_name_modes then return end
+	-- no need to process if user closed formspec without changing mode
+	if nil == fields.mode then return end
+
+	-- collect some information
+	local itemstack = player:get_wielded_item()
+	local node, _ = get_data(itemstack)
+	local mode = fields.mode
+	local name = player:get_player_name()
+
+	-- set metadata and itemstring
+	set_data(itemstack, node, mode)
+	-- update wielded item
+	player:set_wielded_item(itemstack)
+	--[[ NOTE: for now I leave this code here in case we later make this a setting in
+				some way that does not mute all messages of tool
+	-- spam players chat with information
+	inform(name, "Mode changed to: " .. mode .. ": " .. mode_infos[mode])
+	--]]
+end
+-- listen to submitted fields
+minetest.register_on_player_receive_fields(replacer_register_on_player_receive_fields)
 
 local poshash = minetest.hash_node_position
 
@@ -449,7 +517,19 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 		return
 	end
 
+	local keys = user:get_player_control()
 	local name = user:get_player_name()
+
+	-- is special-key held? (aka fast-key)
+	if keys.aux1 then
+		-- fetch current mode
+		local _, mode = get_data(itemstack)
+		-- Show formspec to choose mode
+		minetest.show_formspec(name, replacer_form_name_modes, get_form_modes(mode))
+		-- return unchanged tool
+		return itemstack
+	end
+
 	local creative_enabled = creative.is_enabled_for(name)
 
 	if pt.type ~= "node" then
