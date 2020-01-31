@@ -43,6 +43,32 @@ local function set_data(stack, node, mode)
 	return metadata
 end
 
+local replacer_form_name_modes = "replacer_replacer_mode_change"
+local function get_form_modes(current_mode)
+	-- TODO: possibly add the info here instead of as
+	-- a chat message
+	-- TODO: add close button for mobile users who possibly can't esc
+	-- need feedback from mobile user to know if this is required
+	local formspec = "size[3.9,2]"
+		.. "label[0,0;Choose mode]"
+	if current_mode ~= modes[1] then
+		formspec = formspec .. "button_exit[0.0,0.6;2,0.5;mode;" .. modes[1] .. "]"
+	end
+	if current_mode ~= modes[2] then
+		formspec = formspec .. "button_exit[1.9,0.6;2,0.5;mode;" .. modes[2] .. "]"
+	end
+	if current_mode ~= modes[3] then
+		formspec = formspec .. "button_exit[0.0,1.4;2,0.5;mode;" .. modes[3] .. "]"
+	end
+	-- TODO: enable mode when it is available
+	--[[
+	if current_mode ~= modes[4] then
+		formspec = formspec .. "button_exit[1.9,1.4;2,0.5;mode;" .. modes[] .. "]"
+	end
+	--]]
+	return formspec
+end
+
 technic.register_power_tool("replacer:replacer", replacer.max_charge)
 
 minetest.register_tool("replacer:replacer", {
@@ -66,12 +92,13 @@ minetest.register_tool("replacer:replacer", {
 		local creative_enabled = creative.is_enabled_for(name)
 		local has_give = minetest.check_player_privs(name, "give")
 
+		-- is special-key held? (aka fast-key)
 		if keys.aux1 then
-			-- Change Mode when holding the fast key
-			local node, mode = get_data(itemstack)
-			mode = modes[modes[mode]%#modes+1]
-			set_data(itemstack, node, mode)
-			inform(name, "Mode changed to: "..mode..": "..mode_infos[mode])
+			-- fetch current mode
+			local _, mode = get_data(itemstack)
+			-- Show formspec to choose mode
+			minetest.show_formspec(name, replacer_form_name_modes, get_form_modes(mode))
+			-- return unchanged tool
 			return itemstack
 		end
 
@@ -165,6 +192,28 @@ minetest.register_tool("replacer:replacer", {
 		return replacer.replace(...)
 	end,
 })
+
+local function replacer_register_on_player_receive_fields(player, form_name, fields)
+	-- no need to process if it's not expected formspec that triggered call
+	if form_name ~= replacer_form_name_modes then return end
+	-- no need to process if user closed formspec without changing mode
+	if nil == fields.mode then return end
+
+	-- collect some information
+	local itemstack = player:get_wielded_item()
+	local node, _ = get_data(itemstack)
+	local mode = fields.mode
+	local name = player:get_player_name()
+
+	-- set metadata and itemstring
+	set_data(itemstack, node, mode)
+	-- update wielded item
+	player:set_wielded_item(itemstack)
+	-- spam players chat with information
+	inform(name, "Mode changed to: " .. mode .. ": " .. mode_infos[mode])
+end
+-- listen to submitted fields
+minetest.register_on_player_receive_fields(replacer_register_on_player_receive_fields)
 
 local poshash = minetest.hash_node_position
 
