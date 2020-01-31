@@ -95,10 +95,14 @@ minetest.register_tool("replacer:replacer", {
 		-- is special-key held? (aka fast-key)
 		if keys.aux1 then
 			-- fetch current mode
-			local _, mode = get_data(itemstack)
-			-- Show formspec to choose mode
-			minetest.show_formspec(name, replacer_form_name_modes, get_form_modes(mode))
-			-- return unchanged tool
+			local node, mode = get_data(itemstack)
+			-- increment and roll-over mode
+			mode = modes[modes[mode]%#modes+1]
+			-- update tool
+			set_data(itemstack, node, mode)
+			-- spam chat
+			inform(name, "Mode changed to: " .. mode .. ": " .. mode_infos[mode])
+			-- return changed tool
 			return itemstack
 		end
 
