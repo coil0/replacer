@@ -498,7 +498,19 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 		return
 	end
 
+	local keys = user:get_player_control()
 	local name = user:get_player_name()
+
+	-- is special-key held? (aka fast-key)
+	if keys.aux1 then
+		-- fetch current mode
+		local _, mode = get_data(itemstack)
+		-- Show formspec to choose mode
+		minetest.show_formspec(name, replacer_form_name_modes, get_form_modes(mode))
+		-- return unchanged tool
+		return itemstack
+	end
+
 	local creative_enabled = creative.is_enabled_for(name)
 
 	if pt.type ~= "node" then
