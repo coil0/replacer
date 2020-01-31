@@ -50,6 +50,7 @@ Just wield it and click on any node or entity you want to know more about. A lim
 * SwissalpS
 * OgelGames
 * BuckarooBanzay
+* S-S-X
 
 # License
 
