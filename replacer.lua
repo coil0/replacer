@@ -35,7 +35,7 @@ local function set_data(stack, node, mode)
 	mode = mode or modes[1]
 	local metadata = (node.name or "default:dirt") .. " "
 		.. (node.param1 or 0) .. " "
-		.. (node.param2 or 0) .." "
+		.. (node.param2 or 0) .. " "
 		.. mode
 	local meta = stack:get_meta()
 	meta:set_string("replacer", metadata)
