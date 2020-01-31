@@ -25,7 +25,8 @@ will be taken from your inventory.
 
 # Modes
 
-Special-right-click to cycle through the modes. Single-mode does not need any charge. The other modes do.
+Special-right-click on a node or special-left-click anywhere to change the mode.
+Single-mode does not need any charge. The other modes do.
 
 The second tool included in this mod is the inspector.
 
