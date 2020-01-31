@@ -225,8 +225,11 @@ local function replacer_register_on_player_receive_fields(player, form_name, fie
 	set_data(itemstack, node, mode)
 	-- update wielded item
 	player:set_wielded_item(itemstack)
+	--[[ NOTE: for now I leave this code here in case we later make this a setting in
+				some way that does not mute all messages of tool
 	-- spam players chat with information
 	inform(name, "Mode changed to: " .. mode .. ": " .. mode_infos[mode])
+	--]]
 end
 -- listen to submitted fields
 minetest.register_on_player_receive_fields(replacer_register_on_player_receive_fields)
