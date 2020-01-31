@@ -559,6 +559,16 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 		return
 	end
 
+	if 0 == num then
+		local succ, err = replace_single_node(pos, node_toreplace, nnd, user,
+			name, user:get_inventory(), creative_enabled)
+
+		if not succ then
+			inform(name, err)
+		end
+		return
+	end
+
 	local charge_needed = replacer.charge_per_node * num
 	if meta.charge < charge_needed then
 		inform(name, "Need " .. charge_needed .. " charge to replace " .. num .. " nodes.")
