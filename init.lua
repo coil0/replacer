@@ -43,20 +43,20 @@ replacer.blacklist = {};
 
 -- playing with tnt and creative building are usually contradictory
 -- (except when doing large-scale landscaping in singleplayer)
-replacer.blacklist[ "tnt:boom"] = true;
-replacer.blacklist[ "tnt:gunpowder"] = true;
-replacer.blacklist[ "tnt:gunpowder_burning"] = true;
-replacer.blacklist[ "tnt:tnt"] = true;
+replacer.blacklist["tnt:boom"] = true;
+replacer.blacklist["tnt:gunpowder"] = true;
+replacer.blacklist["tnt:gunpowder_burning"] = true;
+replacer.blacklist["tnt:tnt"] = true;
 
 -- prevent accidental replacement of your protector
-replacer.blacklist[ "protector:protect"] = true;
-replacer.blacklist[ "protector:protect2"] = true;
+replacer.blacklist["protector:protect"] = true;
+replacer.blacklist["protector:protect2"] = true;
 
 replacer.max_charge = 30000
 replacer.charge_per_node = 15
-replacer.max_nodes = tonumber( minetest.settings:get("replacer.max_nodes") or "3168")
+replacer.max_nodes = tonumber(minetest.settings:get("replacer.max_nodes") or "3168")
 
 -- adds a tool for inspecting nodes and entities
-dofile(path.."/inspect.lua")
-dofile(path.."/replacer.lua")
-dofile(path.."/crafts.lua")
+dofile(path .. "/inspect.lua")
+dofile(path .. "/replacer.lua")
+dofile(path .. "/crafts.lua")
