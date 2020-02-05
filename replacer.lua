@@ -1,466 +1,126 @@
+replacer.tool_name_basic = "replacer:replacer"
+replacer.tool_name_technic = "replacer:replacer_technic"
+replacer.tool_default_node = "default:dirt"
 
-local function inform(name, msg)
+local r = replacer
+local rb = replacer.blabla
+local rp = replacer.patterns
+
+function replacer.inform(name, msg)
 	minetest.chat_send_player(name, msg)
-	minetest.log("info", "[replacer] "..name..": "..msg)
+	minetest.log("info", rb.log:format(name, msg))
 end
 
-local mode_infos = {
-	single = "Replace single node.",
-	field = "Left click: Replace field of nodes of a kind where a translucent node is in front of it. Right click: Replace field of air where no translucent node is behind the air.",
-	crust = "Left click: Replace nodes which touch another one of its kind and a translucent node, e.g. air. Right click: Replace air nodes which touch the crust",
-	chunkborder = "TODO",
-}
-local mode_colours = {
-	single = "#ffffff",
-	field = "#54FFAC",
-	crust = "#9F6200",
-	chunkborder = "#FF5457",
-}
-local modes = {"single", "field", "crust", "chunkborder"}
-for n = 1,#modes do
-	modes[modes[n]] = n
+replacer.modes = { "single", "field", "crust", "chunkborder" }
+for n = 1, #r.modes do
+	r.modes[r.modes[n]] = n
 end
 
-local function get_data(stack)
-	local daten = stack:get_meta():get_string"replacer":split" " or {}
-	return {
-			name = daten[1] or "default:dirt",
-			param1 = tonumber(daten[2]) or 0,
-			param2 = tonumber(daten[3]) or 0
-		},
-		modes[daten[4]] and daten[4] or modes[1]
+replacer.mode_infos = {}
+replacer.mode_infos[r.modes[1]] = rb.mode_single
+replacer.mode_infos[r.modes[2]] = rb.mode_field
+replacer.mode_infos[r.modes[3]] = rb.mode_crust
+replacer.mode_infos[r.modes[4]] = rb.mode_chunkborder
+
+replacer.mode_colours = {}
+replacer.mode_colours[r.modes[1]] = "#ffffff"
+replacer.mode_colours[r.modes[2]] = "#54FFAC"
+replacer.mode_colours[r.modes[3]] = "#9F6200"
+replacer.mode_colours[r.modes[4]] = "#FF5457"
+
+function replacer.get_data(stack)
+	local data = stack:get_meta():get_string("replacer"):split(" ") or {}
+	local node = {
+		name = data[1] or r.tool_default_node,
+		param1 = tonumber(data[2]) or 0,
+		param2 = tonumber(data[3]) or 0
+	}
+	local mode = r.modes[1]
+	if data[4] and r.modes[data[4]] then
+		mode = data[4]
+	end
+	return node, mode
 end
 
-local function set_data(stack, node, mode)
-	mode = mode or modes[1]
-	local metadata = (node.name or "default:dirt") .. " "
-		.. (node.param1 or 0) .. " "
-		.. (node.param2 or 0) .. " "
+function replacer.set_data(stack, node, mode)
+	mode = mode or r.modes[1]
+	local metadata = (node.name or replacer.tool_default_node) .. " "
+		.. tostring(node.param1 or 0) .. " "
+		.. tostring(node.param2 or 0) .. " "
 		.. mode
 	local meta = stack:get_meta()
 	meta:set_string("replacer", metadata)
-	meta:set_string("color", mode_colours[mode])
+	meta:set_string("color", r.mode_colours[mode])
 	return metadata
 end
 
-local replacer_form_name_modes = "replacer_replacer_mode_change"
-local function get_form_modes(current_mode)
+replacer.form_name_modes = "replacer_replacer_mode_change"
+function replacer.get_form_modes(current_mode)
 	-- TODO: possibly add the info here instead of as
 	-- a chat message
-	-- TODO: add close button for mobile users who possibly can't esc
-	-- need feedback from mobile user to know if this is required
 	local formspec = "size[3.9,2]"
 		.. "label[0,0;Choose mode]"
 		.. "button_exit[0.0,0.6;2,0.5;"
-	if current_mode == modes[1] then
-		formspec = formspec .. "_;< " .. modes[1] .. " >]"
+	if r.modes[1] == current_mode then
+		formspec = formspec .. "_;< " .. r.modes[1] .. " >]"
 	else
-		formspec = formspec .. "mode;" .. modes[1] .. "]"
+		formspec = formspec .. "mode;" .. r.modes[1] .. "]"
 	end
 	formspec = formspec .. "button_exit[1.9,0.6;2,0.5;"
-	if current_mode == modes[2] then
-		formspec = formspec .. "_;< " .. modes[2] .. " >]"
+	if r.modes[2] == current_mode then
+		formspec = formspec .. "_;< " .. r.modes[2] .. " >]"
 	else
-		formspec = formspec .. "mode;" .. modes[2] .. "]"
+		formspec = formspec .. "mode;" .. r.modes[2] .. "]"
 	end
 	formspec = formspec .. "button_exit[0.0,1.4;2,0.5;"
-	if current_mode == modes[3] then
-		formspec = formspec .. "_;< " .. modes[3] .. " >]"
+	if r.modes[3] == current_mode then
+		formspec = formspec .. "_;< " .. r.modes[3] .. " >]"
 	else
-		formspec = formspec .. "mode;" .. modes[3] .. "]"
+		formspec = formspec .. "mode;" .. r.modes[3] .. "]"
 	end
 	-- TODO: enable mode when it is available
 	--[[
 	formspec = formspec .. "button_exit[1.9,1.4;2,0.5;"
-	if current_mode == modes[4] then
-		formspec = formspec .. "_;< " .. modes[4] .. " >]"
+	if r.modes[4] == current_mode then
+		formspec = formspec .. "_;< " .. r.modes[4] .. " >]"
 	else
-		formspec = formspec .. "mode;" .. modes[4] .. "]"
+		formspec = formspec .. "mode;" .. r.modes[4] .. "]"
 	end
 	--]]
 	return formspec
-end
-
-technic.register_power_tool("replacer:replacer", replacer.max_charge)
-
-minetest.register_tool("replacer:replacer", {
-	description = "Node replacement tool",
-	inventory_image = "replacer_replacer.png",
-	stack_max = 1, -- it has to store information - thus only one can be stacked
-	wear_represents = "technic_RE_charge",
-	on_refill = technic.refill_RE_charge,
-	liquids_pointable = true, -- it is ok to painit in/with water
-	--node_placement_prediction = nil,
-	metadata = "default:dirt", -- default replacement: common dirt
-
-	on_place = function(itemstack, placer, pt)
-		if not placer
-		or not pt then
-			return
-		end
-
-		local keys = placer:get_player_control()
-		local name = placer:get_player_name()
-		local creative_enabled = creative.is_enabled_for(name)
-		local has_give = minetest.check_player_privs(name, "give")
-
-		-- is special-key held? (aka fast-key)
-		if keys.aux1 then
-			-- fetch current mode
-			local node, mode = get_data(itemstack)
-			-- increment and roll-over mode
-			mode = modes[modes[mode]%#modes+1]
-			-- update tool
-			set_data(itemstack, node, mode)
-			-- spam chat
-			inform(name, "Mode changed to: " .. mode .. ": " .. mode_infos[mode])
-			-- return changed tool
-			return itemstack
-		end
-
-		-- If not holding sneak key, place node(s)
-		if not keys.sneak then
-			return replacer.replace(itemstack, placer, pt, true)
-		end
-
-		-- Select new node
-		if pt.type ~= "node" then
-			inform(name, "Error: No node selected.")
-			return
-		end
-
-		local node, mode = get_data(itemstack)
-		node = minetest.get_node_or_nil(pt.under) or node
-
-		local inv = placer:get_inventory()
-		if not (creative_enabled and has_give)
-		and not inv:contains_item("main", node.name) then
-			if creative_enabled then
-				if minetest.get_item_group(node.name,
-						"not_in_creative_inventory") > 0 then
-					-- search for a drop available in creative inventory
-					local found_item = false
-					local drops = minetest.get_node_drops(node.name)
-					for i = 1,#drops do
-						local name = drops[i]
-						if minetest.registered_nodes[name]
-						and minetest.get_item_group(name,
-								"not_in_creative_inventory") == 0 then
-							node.name = name
-							found_item = true
-							break
-						end
-					end
-					if not found_item then
-						inform(name, "Node not in creative invenotry: \"" ..
-							node.name .. "\".")
-						return
-					end
-				end
-			else
-				local found_item = false
-				-- search for a drop that the player has if possible
-				local drops = minetest.get_node_drops(node.name)
-				for i = 1,#drops do
-					local name = drops[i]
-					if minetest.registered_nodes[name]
-					and inv:contains_item("main", name) then
-						node.name = name
-						found_item = true
-						break
-					end
-				end
-				if not found_item then
-					-- search for a drop available in creative inventory
-					-- that first configuring the replacer,
-					-- then digging the nodes works
-					for i = 1,#drops do
-						local name = drops[i]
-						if minetest.registered_nodes[name]
-						and minetest.get_item_group(name,
-								"not_in_creative_inventory") == 0 then
-							node.name = name
-							found_item = true
-							break
-						end
-					end
-				end
-				if not found_item
-				and not has_give then
-					inform(name, "Item not in your inventory: '" .. node.name ..
-						"'.")
-					return
-				end
-			end
-		end
-
-		local metadata = set_data(itemstack, node, mode)
-
-		inform(name, "Node replacement tool set to: '" .. metadata .. "'.")
-
-		return itemstack --data changed
-	end,
-
---	on_drop = func(itemstack, dropper, pos),
-
-	on_use = function(...)
-		-- Replace nodes
-		return replacer.replace(...)
-	end,
-})
-
-local function replacer_register_on_player_receive_fields(player, form_name, fields)
-	-- no need to process if it's not expected formspec that triggered call
-	if form_name ~= replacer_form_name_modes then return end
-	-- no need to process if user closed formspec without changing mode
-	if nil == fields.mode then return end
-
-	-- collect some information
-	local itemstack = player:get_wielded_item()
-	local node, _ = get_data(itemstack)
-	local mode = fields.mode
-	local name = player:get_player_name()
-
-	-- set metadata and itemstring
-	set_data(itemstack, node, mode)
-	-- update wielded item
-	player:set_wielded_item(itemstack)
-	--[[ NOTE: for now I leave this code here in case we later make this a setting in
-				some way that does not mute all messages of tool
-	-- spam players chat with information
-	inform(name, "Mode changed to: " .. mode .. ": " .. mode_infos[mode])
-	--]]
-end
--- listen to submitted fields
-minetest.register_on_player_receive_fields(replacer_register_on_player_receive_fields)
-
-local poshash = minetest.hash_node_position
-
--- cache results of minetest.get_node
-local known_nodes = {}
-local function get_node(pos)
-	local i = poshash(pos)
-	local node = known_nodes[i]
-	if node then
-		return node
-	end
-	node = minetest.get_node(pos)
-	known_nodes[i] = node
-	return node
-end
-
--- tests if there's a node at pos which should be replaced
-local function replaceable(pos, name, pname)
-	return get_node(pos).name == name
-		and not minetest.is_protected(pos, pname)
-end
-
-local trans_nodes = {}
-local function node_translucent(name)
-	if trans_nodes[name] ~= nil then
-		return trans_nodes[name]
-	end
-	local data = minetest.registered_nodes[name]
-	if data
-	and (not data.drawtype or data.drawtype == "normal") then
-		trans_nodes[name] = false
-		return false
-	end
-	trans_nodes[name] = true
-	return true
-end
-
-local function field_position(pos, data)
-	return replaceable(pos, data.name, data.pname)
-		and node_translucent(
-			get_node(vector.add(data.above, pos)).name) ~= data.right_clicked
-end
-
-local offsets_touch = {
-	{x =-1, y = 0, z = 0},
-	{x = 1, y = 0, z = 0},
-	{x = 0, y =-1, z = 0},
-	{x = 0, y = 1, z = 0},
-	{x = 0, y = 0, z =-1},
-	{x = 0, y = 0, z = 1},
-}
-
--- 3x3x3 hollow cube
-local offsets_hollowcube = {}
-for x = -1, 1 do
-	for y = -1, 1 do
-		for z = -1, 1 do
-			local p = {x = x, y = y, z = z}
-			if x ~= 0
-			or y ~= 0
-			or z ~= 0 then
-				offsets_hollowcube[#offsets_hollowcube + 1] = p
-			end
-		end
-	end
-end
-
--- To get the crust, first nodes near it need to be collected
-local function crust_above_position(pos, data)
-	-- test if the node at pos is a translucent node and not part of the crust
-	local nd = get_node(pos).name
-	if nd == data.name
-	or not node_translucent(nd) then
-		return false
-	end
-	-- test if a node of the crust is near pos
-	for i = 1, 26 do
-		local p2 = offsets_hollowcube[i]
-		if replaceable(vector.add(pos, p2), data.name, data.pname) then
-			return true
-		end
-	end
-	return false
-end
-
--- used to get nodes the crust belongs to
-local function crust_under_position(pos, data)
-	if not replaceable(pos, data.name, data.pname) then
-		return false
-	end
-	for i = 1, 26 do
-		local p2 = offsets_hollowcube[i]
-		if data.aboves[poshash(vector.add(pos, p2))] then
-			return true
-		end
-	end
-	return false
-end
-
--- extract the crust from the nodes the crust belongs to
-local function reduce_crust_ps(data)
-	local newps = {}
-	local n = 0
-	for i = 1, data.num do
-		local p = data.ps[i]
-		for i = 1,6 do
-			local p2 = offsets_touch[i]
-			if data.aboves[poshash(vector.add(p, p2))] then
-				n = n + 1
-				newps[n] = p
-				break
-			end
-		end
-	end
-	data.ps = newps
-	data.num = n
-end
-
--- gets the air nodes touching the crust
-local function reduce_crust_above_ps(data)
-	local newps = {}
-	local n = 0
-	for i = 1, data.num do
-		local p = data.ps[i]
-		if replaceable(p, "air", data.pname) then
-			for i = 1, 6 do
-				local p2 = offsets_touch[i]
-				if replaceable(vector.add(p, p2), data.name, data.pname) then
-					n = n + 1
-					newps[n] = p
-					break
-				end
-			end
-		end
-	end
-	data.ps = newps
-	data.num = n
-end
-
-local function mantle_position(pos, data)
-	if not replaceable(pos, data.name, data.pname) then
-		return false
-	end
-	for i = 1, 6 do
-		if get_node(vector.add(pos, offsets_touch[i])).name ~= data.name then
-			return true
-		end
-	end
-	return false
-end
-
--- finds out positions using depth first search
-local function get_ps(pos, fdata, adps, max)
-	adps = adps or offsets_touch
-
-	local tab = {}
-	local num = 0
-
-	local todo = {pos}
-	local ti = 1
-
-	local tab_avoid = {}
-
-	while ti ~= 0 do
-		local p = todo[ti]
-		--~ todo[ti] = nil
-		ti = ti - 1
-
-		for _, p2 in pairs(adps) do
-			p2 = vector.add(p, p2)
-			local i = poshash(p2)
-			if not tab_avoid[i]
-			and fdata.func(p2, fdata) then
-
-				num = num + 1
-				tab[num] = p2
-
-				ti = ti + 1
-				todo[ti] = p2
-
-				tab_avoid[i] = true
-
-				if max
-				and num >= max then
-					return false
-				end
-			end
-		end
-	end
-	return tab, num, tab_avoid
-end
+end -- get_form_modes
 
 -- replaces one node with another one and returns if it was successful
-local function replace_single_node(pos, node, nnd, player, name, inv, creative)
+function replacer.replace_single_node(pos, node, nnd, player, name, inv, creative)
 	if minetest.is_protected(pos, name) then
-		return false, "Protected at " .. minetest.pos_to_string(pos)
+		return false, rb.protected_at:format(minetest.pos_to_string(pos))
 	end
 
 	if replacer.blacklist[node.name] then
-		return false, "Replacing blocks of the type '" ..
-			node.name ..
-			"' is not allowed on this server. Replacement failed."
+		return false, rb.blacklisted:format(node.name)
 	end
 
 	-- do not replace if there is nothing to be done
 	if node.name == nnd.name then
 		-- only the orientation was changed
-		if node.param1 ~= nnd.param1
-		or node.param2 ~= nnd.param2 then
+		if (node.param1 ~= nnd.param1) or (node.param2 ~= nnd.param2) then
 			minetest.swap_node(pos, nnd)
 		end
 		return true
 	end
 
 	-- does the player carry at least one of the desired nodes with him?
-	if not creative
-	and not inv:contains_item("main", nnd.name) then
-		return false, "You have no further '" .. (nnd.name or "?") ..
-			"'. Replacement failed."
+	if (not creative) and (not inv:contains_item("main", nnd.name)) then
+		return false, rb.run_out:format(nnd.name or "?")
 	end
 
 	local ndef = minetest.registered_nodes[node.name]
 	if not ndef then
-		return false, "Unknown node: " .. node.name
+		return false, rb.attempt_unknown_replace:format(node.name)
 	end
 	local new_ndef = minetest.registered_nodes[nnd.name]
 	if not new_ndef then
-		return false, "Unknown node should be placed: " .. nnd.name
+		return false, rb.attempt_unknown_place:format(nnd.name)
 	end
 
 	-- dig the current node if needed
@@ -469,18 +129,18 @@ local function replace_single_node(pos, node, nnd, player, name, inv, creative)
 		ndef.on_dig(pos, node, player)
 		-- test if digging worked
 		local dug_node = minetest.get_node_or_nil(pos)
-		if not dug_node
-		or not minetest.registered_nodes[dug_node.name].buildable_to then
-			return false, "Couldn't dig '" .. node.name .. "' properly."
+		if (not dug_node) or
+			(not minetest.registered_nodes[dug_node.name].buildable_to) then
+			return false, rb.can_not_dig:format(node.name)
 		end
 	end
 
 	-- place the node similar to how a player does it
 	-- (other than the pointed_thing)
 	local newitem, succ = new_ndef.on_place(ItemStack(nnd.name), player,
-		{type = "node", under = vector.new(pos), above = vector.new(pos)})
-	if succ == false then
-		return false, "Couldn't place '" .. nnd.name .. "'."
+		{ type = "node", under = vector.new(pos), above = vector.new(pos) })
+	if false == succ then
+		return false, rb.can_not_place:format(nnd.name)
 	end
 
 	-- update inventory in survival mode
@@ -488,7 +148,7 @@ local function replace_single_node(pos, node, nnd, player, name, inv, creative)
 		-- consume the item
 		inv:remove_item("main", nnd.name .. " 1")
 		-- if placing the node didn't result in empty stack…
-		if newitem:to_string() ~= "" then
+		if "" ~= newitem:to_string() then
 			inv:add_item("main", newitem)
 		end
 	end
@@ -508,32 +168,34 @@ local function replace_single_node(pos, node, nnd, player, name, inv, creative)
 	end
 
 	return true
-end
+end -- replace_single_node
 
 -- the function which happens when the replacer is used
 function replacer.replace(itemstack, user, pt, right_clicked)
-	if not user
-	or not pt then
+	if (not user) or (not pt) then
 		return
 	end
-
+	
 	local keys = user:get_player_control()
 	local name = user:get_player_name()
-
+	local creative_enabled = creative.is_enabled_for(name)
+	local has_give = minetest.check_player_privs(name, "give")
+	local is_technic = itemstack:get_name() == replacer.tool_name_technic
+	local modes_are_available = is_technic or has_give or creative_enabled
+	
 	-- is special-key held? (aka fast-key)
 	if keys.aux1 then
+		if not modes_are_available then return itemstack end
 		-- fetch current mode
-		local _, mode = get_data(itemstack)
+		local _, mode = r.get_data(itemstack)
 		-- Show formspec to choose mode
-		minetest.show_formspec(name, replacer_form_name_modes, get_form_modes(mode))
+		minetest.show_formspec(name, r.form_name_modes, r.get_form_modes(mode))
 		-- return unchanged tool
 		return itemstack
 	end
 
-	local creative_enabled = creative.is_enabled_for(name)
-
-	if pt.type ~= "node" then
-		inform(name, "Error: " .. pt.type .. " is not a node.")
+	if "node" ~= pt.type then
+		r.inform(name, rb.not_a_node:format(pt.type))
 		return
 	end
 
@@ -541,59 +203,63 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 	local node_toreplace = minetest.get_node_or_nil(pos)
 
 	if not node_toreplace then
-		inform(name, "Target node not yet loaded. Please wait a " ..
-			"moment for the server to catch up.")
+		r.inform(name, rb.wait_for_load)
 		return
 	end
 
-	local nnd, mode = get_data(itemstack)
-	if node_toreplace.name == nnd.name
-	and node_toreplace.param1 == nnd.param1
-	and node_toreplace.param2 == nnd.param2 then
-		inform(name, "Nothing to replace.")
+	local nnd, mode = r.get_data(itemstack)
+	if (node_toreplace.name == nnd.name)
+		and (node_toreplace.param1 == nnd.param1)
+		and (node_toreplace.param2 == nnd.param2) then
+		r.inform(name, rb.nothing_to_replace)
 		return
 	end
 
 	if replacer.blacklist[nnd.name] then
-		minetest.chat_send_player(name, "Placing blocks of the type '" ..
-			nnd.name ..
-			"' with the replacer is not allowed on this server. " ..
-			"Replacement failed.")
+		minetest.chat_send_player(name, rb.blacklisted:format(nnd.name))
 		return
 	end
 
-	if mode == "single" then
-		local succ, err = replace_single_node(pos, node_toreplace, nnd, user,
+	if not modes_are_available then
+		mode = r.modes[1]
+	end
+	
+	if r.modes[1] == mode then
+		-- single
+		local succ, err = replacer.replace_single_node(pos, node_toreplace, nnd, user,
 			name, user:get_inventory(), creative_enabled)
-
 		if not succ then
-			inform(name, err)
+			r.inform(name, err)
 		end
 		return
 	end
 
+	local max_nodes = replacer.max_nodes
 	local meta = minetest.deserialize(itemstack:get_metadata())
-	if not meta or not meta.charge
-	or meta.charge < replacer.charge_per_node then
-		inform(name, "Not enough charge to use this mode.")
-		return
-	end
+	if replacer.has_technic_mod and (not (creative_enabled or has_give)) then
+		if (not meta) or (not meta.charge) or (meta.charge < replacer.charge_per_node) then
+			r.inform(name, rb.need_more_charge)
+			return
+		end
 
-	local max_charge_to_use = math.min(meta.charge, replacer.max_charge)
-	local max_nodes = math.floor(max_charge_to_use / replacer.charge_per_node)
-	if max_nodes > replacer.max_nodes then
-		max_nodes = replacer.max_nodes
+		local max_charge_to_use = math.min(meta.charge, replacer.max_charge)
+		max_nodes = math.floor(max_charge_to_use / replacer.charge_per_node)
+		if max_nodes > replacer.max_nodes then
+			max_nodes = replacer.max_nodes
+		end
 	end
 
 	local ps, num
-	if mode == "field" then
+	if r.modes[2] == mode then
+		-- field
 		-- get connected positions for plane field replacing
 		local pdif = vector.subtract(pt.above, pt.under)
 		local adps, n = {}, 1
-		for _, i in pairs{"x", "y", "z"} do
-			if pdif[i] == 0 then
+		local p
+		for _, i in pairs{ "x", "y", "z" } do
+			if 0 == pdif[i] then
 				for a = -1, 1, 2 do
-					local p = {x = 0, y = 0, z = 0}
+					p = { x = 0, y = 0, z = 0 }
 					p[i] = a
 					adps[n] = p
 					n = n + 1
@@ -603,82 +269,261 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 		if right_clicked then
 			pdif = vector.multiply(pdif, -1)
 		end
-		right_clicked = right_clicked and true or false
-		ps, num = get_ps(pos, {func = field_position, name = node_toreplace.name,
-			pname = name, above = pdif, right_clicked = right_clicked}, adps, max_nodes)
-	elseif mode == "crust" then
-		local nodename_clicked = get_node(pt.under).name
-		local aps, n, aboves = get_ps(pt.above, {func = crust_above_position,
-			name = nodename_clicked, pname = name}, nil, max_nodes)
+		right_clicked = (right_clicked and true) or false
+		ps, num = rp.get_ps(pos, { func = rp.field_position, name = node_toreplace.name,
+			pname = name, above = pdif, right_clicked = right_clicked }, adps, max_nodes)
+	elseif r.modes[3] == mode then
+		-- crust
+		local nodename_clicked = rp.get_node(pt.under).name
+		local aps, n, aboves = rp.get_ps(pt.above, { func = rp.crust_above_position,
+			name = nodename_clicked, pname = name }, nil, max_nodes)
 		if aps then
 			if right_clicked then
-				local data = {ps = aps, num = n, name = nodename_clicked, pname = name}
-				reduce_crust_above_ps(data)
+				local data = { ps = aps, num = n, name = nodename_clicked, pname = name }
+				rp.reduce_crust_above_ps(data)
 				ps, num = data.ps, data.num
 			else
-				ps, num = get_ps(pt.under, {func = crust_under_position,
-					name = node_toreplace.name, pname = name, aboves = aboves},
-					offsets_hollowcube, max_nodes)
+				ps, num = rp.get_ps(pt.under, { func = rp.crust_under_position,
+					name = node_toreplace.name, pname = name, aboves = aboves },
+					rp.offsets_hollowcube, max_nodes)
 				if ps then
-					local data = {aboves = aboves, ps = ps, num = num}
-					reduce_crust_ps(data)
+					local data = { aboves = aboves, ps = ps, num = num }
+					rp.reduce_crust_ps(data)
 					ps, num = data.ps, data.num
 				end
 			end
 		end
-	elseif mode == "chunkborder" then
-		ps, num = get_ps(pos, {func = mantle_position, name = node_toreplace.name,
-			pname = name}, nil, max_nodes)
+	elseif r.modes[4] == mode then
+		-- chunkborder
+		ps, num = rp.get_ps(pos, { func = rp.mantle_position, name = node_toreplace.name,
+			pname = name }, nil, max_nodes)
 	end
 
 	-- reset known nodes table
-	known_nodes = {}
+	replacer.patterns.known_nodes = {}
 
 	if not ps then
-		inform(name, "Aborted, too many nodes detected.")
+		r.inform(name, rb.too_many_nodes_detected)
 		return
 	end
 
 	if 0 == num then
-		local succ, err = replace_single_node(pos, node_toreplace, nnd, user,
+		local succ, err = r.replace_single_node(pos, node_toreplace, nnd, user,
 			name, user:get_inventory(), creative_enabled)
-
 		if not succ then
-			inform(name, err)
+			r.inform(name, err)
 		end
 		return
 	end
 
 	local charge_needed = replacer.charge_per_node * num
-	if meta.charge < charge_needed then
-		inform(name, "Need " .. charge_needed .. " charge to replace " .. num .. " nodes.")
-		return
+	if replacer.has_technic_mod and (not (creative_enabled or has_give)) then
+		if (meta.charge < charge_needed) then
+			r.inform(name, rb.charge_required:format(charge_needed, num))
+			return
+		end
 	end
 
 	-- set nodes
 	local inv = user:get_inventory()
 	for i = 1, num do
 		local pos = ps[i]
-		local succ, err = replace_single_node(pos, minetest.get_node(pos), nnd,
+		local succ, err = r.replace_single_node(pos, minetest.get_node(pos), nnd,
 			user, name, inv, creative_enabled)
 		if not succ then
-			inform(name, err)
-			if not technic.creative_mode then
-				meta.charge = meta.charge - replacer.charge_per_node * i
-				technic.set_RE_wear(itemstack, meta.charge, replacer.max_charge)
-				itemstack:set_metadata(minetest.serialize(meta))
-				return itemstack
+			r.inform(name, err)
+			if replacer.has_technic_mod and (not technic.creative_mode) then
+				if not (creative_enabled or has_give) then
+					meta.charge = meta.charge - replacer.charge_per_node * i
+					technic.set_RE_wear(itemstack, meta.charge, replacer.max_charge)
+					itemstack:set_metadata(minetest.serialize(meta))
+					return itemstack
+				end
 			end
 			return
 		end
 	end
 
-	if not technic.creative_mode then
-		meta.charge = meta.charge - replacer.charge_per_node * num
-		technic.set_RE_wear(itemstack, meta.charge, replacer.max_charge)
-		itemstack:set_metadata(minetest.serialize(meta))
+	if replacer.has_technic_mod and (not technic.creative_mode) then
+		if not (creative_enabled or has_give) then
+			meta.charge = meta.charge - charge_needed
+			technic.set_RE_wear(itemstack, meta.charge, replacer.max_charge)
+			itemstack:set_metadata(minetest.serialize(meta))
+			return itemstack
+		end
+	end
+	r.inform(name, rb.count_replaced:format(num))
+end -- replacer.replace
+
+-- right-click with tool -> place set node
+-- special+right-click -> cycle mode (if tool/privs permit)
+-- sneak+right-click -> set node
+function replacer.common_on_place(itemstack, placer, pt)
+	if (not placer)	or (not pt) then
+		return
+	end
+
+	local keys = placer:get_player_control()
+	local name = placer:get_player_name()
+	local creative_enabled = creative.is_enabled_for(name)
+	local has_give = minetest.check_player_privs(name, "give")
+	local is_technic = itemstack:get_name() == replacer.tool_name_technic
+	local modes_are_available = is_technic or has_give or creative_enabled
+
+	-- is special-key held? (aka fast-key)
+	if keys.aux1 then
+		-- don't want anybody to think that special+rc = place
+		if not modes_are_available then return end
+		-- fetch current mode
+		local node, mode = r.get_data(itemstack)
+		-- increment and roll-over mode
+print(dump(mode))
+		mode = r.modes[r.modes[mode] % #r.modes + 1]
+		-- update tool
+		r.set_data(itemstack, node, mode)
+		-- spam chat
+		r.inform(name, rb.mode_changed:format(mode, r.mode_infos[mode]))
+		-- return changed tool
 		return itemstack
 	end
-	inform(name, num .. " nodes replaced.")
+
+	-- If not holding sneak key, place node(s)
+	if not keys.sneak then
+		return replacer.replace(itemstack, placer, pt, true)
+	end
+
+	-- Select new node
+	if pt.type ~= "node" then
+		r.inform(name, rb.none_selected)
+		return
+	end
+
+	local node, mode = r.get_data(itemstack)
+	node = minetest.get_node_or_nil(pt.under) or node
+	
+	if not modes_are_available then
+		mode = r.modes[1]
+	end
+
+	local inv = placer:get_inventory()
+	if (not (creative_enabled and has_give))
+		and (not inv:contains_item("main", node.name)) then
+		-- not in inv and not (creative and give)
+		local found_item = false
+		local drops = minetest.get_node_drops(node.name)
+		if creative_enabled then
+			if minetest.get_item_group(node.name,
+					"not_in_creative_inventory") > 0 then
+				-- search for a drop available in creative inventory
+				for i = 1, #drops do
+					local name = drops[i]
+					if minetest.registered_nodes[name]
+					and minetest.get_item_group(name,
+							"not_in_creative_inventory") == 0 then
+						node.name = name
+						found_item = true
+						break
+					end
+				end
+				if not found_item then
+					r.inform(name, rb.not_in_creative:format(node.name))
+					return
+				end
+			end
+		else
+			-- search for a drop that the player has if possible
+			for i = 1, #drops do
+				local name = drops[i]
+				if minetest.registered_nodes[name]
+				and inv:contains_item("main", name) then
+					node.name = name
+					found_item = true
+					break
+				end
+			end
+			if not found_item then
+				-- search for a drop available in creative inventory
+				-- that first configuring the replacer,
+				-- then digging the nodes works
+				for i = 1, #drops do
+					local name = drops[i]
+					if minetest.registered_nodes[name]
+					and minetest.get_item_group(name,
+							"not_in_creative_inventory") == 0 then
+						node.name = name
+						found_item = true
+						break
+					end
+				end
+			end
+			if (not found_item) and (not has_give) then
+				inform(name, rb.not_in_inventory:format(node.name))
+				return
+			end
+		end
+	end
+
+	local metadata = r.set_data(itemstack, node, mode)
+
+	r.inform(name, rb.set_to:format(metadata))
+
+	return itemstack --data changed
+end -- common_on_place
+
+function replacer.tool_def_basic()
+	return {
+		description = rb.description_basic,
+		inventory_image = "replacer_replacer.png",
+		stack_max = 1, -- it has to store information - thus only one can be stacked
+		liquids_pointable = true, -- it is ok to painit in/with water
+		--node_placement_prediction = nil,
+		--metadata = "default:dirt", -- default replacement: common dirt
+
+		--	on_drop = func(itemstack, dropper, pos),
+		
+		-- place node(s)
+		on_place = replacer.common_on_place, --function(...) return common_on_place(...) end,
+
+		-- Replace node(s)
+		on_use = replacer.replace --function(...) return replacer.replace(...)	end,
+	}
 end
 
+minetest.register_tool(replacer.tool_name_basic, replacer.tool_def_basic())
+
+if replacer.has_technic_mod then
+	function replacer.tool_def_technic()
+		local def = replacer.tool_def_basic()
+		def.description = rb.description_technic
+		def.wear_represents = "technic_RE_charge"
+		def.on_refill = technic.refill_RE_charge
+		return def
+	end
+	technic.register_power_tool(replacer.tool_name_technic, replacer.max_charge)
+	minetest.register_tool(replacer.tool_name_technic, replacer.tool_def_technic())
+end
+
+function replacer.register_on_player_receive_fields(player, form_name, fields)
+	-- no need to process if it's not expected formspec that triggered call
+	if form_name ~= replacer.form_name_modes then return end
+	-- no need to process if user closed formspec without changing mode
+	if nil == fields.mode then return end
+
+	-- collect some information
+	local itemstack = player:get_wielded_item()
+	local node, _ = r.get_data(itemstack)
+	local mode = fields.mode
+	local name = player:get_player_name()
+
+	-- set metadata and itemstring
+	r.set_data(itemstack, node, mode)
+	-- update wielded item
+	player:set_wielded_item(itemstack)
+	--[[ NOTE: for now I leave this code here in case we later make this a setting in
+				some way that does not mute all messages of tool
+	-- spam players chat with information
+	r.inform(name, rb.set_to:format(mode, r.mode_infos[mode]))
+	--]]
+end
+-- listen to submitted fields
+minetest.register_on_player_receive_fields(replacer.register_on_player_receive_fields)

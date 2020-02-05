@@ -52,11 +52,21 @@ replacer.blacklist["tnt:tnt"] = true;
 replacer.blacklist["protector:protect"] = true;
 replacer.blacklist["protector:protect2"] = true;
 
+-- charge limits
 replacer.max_charge = 30000
 replacer.charge_per_node = 15
+-- node count limit
 replacer.max_nodes = tonumber(minetest.settings:get("replacer.max_nodes") or "3168")
+
+replacer.has_technic_mod = minetest.get_modpath('technic')
 
 -- adds a tool for inspecting nodes and entities
 dofile(path .. "/inspect.lua")
+dofile(path .. "/replacer_blabla.lua")
+dofile(path .. "/replacer_patterns.lua")
 dofile(path .. "/replacer.lua")
 dofile(path .. "/crafts.lua")
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+print('[replacer] loaded')
+
