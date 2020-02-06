@@ -377,7 +377,6 @@ function replacer.common_on_place(itemstack, placer, pt)
 		-- fetch current mode
 		local node, mode = r.get_data(itemstack)
 		-- increment and roll-over mode
-print(dump(mode))
 		mode = r.modes[r.modes[mode] % #r.modes + 1]
 		-- update tool
 		r.set_data(itemstack, node, mode)
