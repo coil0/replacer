@@ -183,7 +183,7 @@ function replacer.patterns.get_ps(pos, fdata, adps, max)
 				tab_avoid[i] = true
 
 				if max and (num >= max) then
-					return false
+					return tab, num, tab_avoid --false
 				end
 			end -- if
 		end -- for

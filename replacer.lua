@@ -319,8 +319,7 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 	local charge_needed = replacer.charge_per_node * num
 	if replacer.has_technic_mod and (not (creative_enabled or has_give)) then
 		if (meta.charge < charge_needed) then
-			r.inform(name, rb.charge_required:format(charge_needed, num))
-			return
+			num = math.floor(meta.charge / replacer.charge_per_node)
 		end
 	end
 
