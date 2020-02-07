@@ -29,15 +29,16 @@ replacer.mode_colours[r.modes[3]] = "#9F6200"
 replacer.mode_colours[r.modes[4]] = "#FF5457"
 
 function replacer.get_data(stack)
-	local data = stack:get_meta():get_string("replacer"):split(" ") or {}
+	local metaRef = stack:get_meta()
+	local data = metaRef:get_string("replacer"):split(" ") or {}
 	local node = {
 		name = data[1] or r.tool_default_node,
 		param1 = tonumber(data[2]) or 0,
 		param2 = tonumber(data[3]) or 0
 	}
-	local mode = r.modes[1]
-	if data[4] and r.modes[data[4]] then
-		mode = data[4]
+	local mode = metaRef:get_string("mode")
+	if nil == r.modes[mode] then
+		mode = r.modes[1]
 	end
 	return node, mode
 end
@@ -46,11 +47,11 @@ function replacer.set_data(stack, node, mode)
 	mode = mode or r.modes[1]
 	local metadata = (node.name or replacer.tool_default_node) .. " "
 		.. tostring(node.param1 or 0) .. " "
-		.. tostring(node.param2 or 0) .. " "
-		.. mode
-	local meta = stack:get_meta()
-	meta:set_string("replacer", metadata)
-	meta:set_string("color", r.mode_colours[mode])
+		.. tostring(node.param2 or 0)
+	local metaRef = stack:get_meta()
+	metaRef:set_string("mode", mode)
+	metaRef:set_string("replacer", metadata)
+	metaRef:set_string("color", r.mode_colours[mode])
 	return metadata
 end
 
