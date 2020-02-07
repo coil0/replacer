@@ -54,6 +54,28 @@ function replacer.set_data(stack, node, mode)
 	return metadata
 end
 
+if replacer.has_technic_mod then
+	-- technic still stores data serialized, so this is the nearest we get to current standard
+	function replacer.get_charge(itemstack)
+		local meta = minetest.deserialize(itemstack:get_meta():get_string(''))
+		if (not meta) or (not meta.charge) then
+			return 0
+		end
+		return meta.charge
+	end
+
+	function replacer.set_charge(itemstack, charge, max)
+		technic.set_RE_wear(itemstack, charge, max)
+		local metaRef = itemstack:get_meta()
+		local meta = minetest.deserialize(metaRef:get_string(''))
+		if (not meta) or (not meta.charge) then
+			meta = { charge = 0 }
+		end
+		meta.charge = charge
+		metaRef:set_string('', minetest.serialize(meta))
+	end
+end
+
 replacer.form_name_modes = "replacer_replacer_mode_change"
 function replacer.get_form_modes(current_mode)
 	-- TODO: possibly add the info here instead of as
@@ -169,28 +191,6 @@ function replacer.replace_single_node(pos, node, nnd, player, name, inv, creativ
 
 	return true
 end -- replace_single_node
-
-if replacer.has_technic_mod then
-	-- technic still stores data serialized, so this is the nearest we get to current standard
-	function replacer.get_charge(itemstack)
-		local meta = minetest.deserialize(itemstack:get_meta():get_string(''))
-		if (not meta) or (not meta.charge) then
-			return 0
-		end
-		return meta.charge
-	end
-
-	function replacer.set_charge(itemstack, charge, max)
-		technic.set_RE_wear(itemstack, charge, max)
-		local metaRef = itemstack:get_meta()
-		local meta = minetest.deserialize(metaRef:get_string(''))
-		if (not meta) or (not meta.charge) then
-			meta = { charge = 0 }
-		end
-		meta.charge = charge
-		metaRef:set_string('', minetest.serialize(meta))
-	end
-end
 
 -- the function which happens when the replacer is used
 function replacer.replace(itemstack, user, pt, right_clicked)
@@ -496,15 +496,10 @@ function replacer.tool_def_basic()
 		stack_max = 1, -- it has to store information - thus only one can be stacked
 		liquids_pointable = true, -- it is ok to painit in/with water
 		--node_placement_prediction = nil,
-		--metadata = "default:dirt", -- default replacement: common dirt
-
-		--	on_drop = func(itemstack, dropper, pos),
-		
 		-- place node(s)
-		on_place = replacer.common_on_place, --function(...) return common_on_place(...) end,
-
+		on_place = replacer.common_on_place,
 		-- Replace node(s)
-		on_use = replacer.replace --function(...) return replacer.replace(...)	end,
+		on_use = replacer.replace
 	}
 end
 
@@ -546,3 +541,4 @@ function replacer.register_on_player_receive_fields(player, form_name, fields)
 end
 -- listen to submitted fields
 minetest.register_on_player_receive_fields(replacer.register_on_player_receive_fields)
+

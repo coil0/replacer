@@ -166,7 +166,6 @@ function replacer.patterns.get_ps(pos, fdata, adps, max)
 
 	while 0 ~= ti do
 		p = todo[ti]
-		--~ todo[ti] = nil
 		ti = ti - 1
 
 		for _, p2 in pairs(adps) do
@@ -183,7 +182,7 @@ function replacer.patterns.get_ps(pos, fdata, adps, max)
 				tab_avoid[i] = true
 
 				if max and (num >= max) then
-					return tab, num, tab_avoid --false
+					return tab, num, tab_avoid
 				end
 			end -- if
 		end -- for
