@@ -170,6 +170,28 @@ function replacer.replace_single_node(pos, node, nnd, player, name, inv, creativ
 	return true
 end -- replace_single_node
 
+if replacer.has_technic_mod then
+	-- technic still stores data serialized, so this is the nearest we get to current standard
+	function replacer.get_charge(itemstack)
+		local meta = minetest.deserialize(itemstack:get_meta():get_string(''))
+		if (not meta) or (not meta.charge) then
+			return 0
+		end
+		return meta.charge
+	end
+
+	function replacer.set_charge(itemstack, charge, max)
+		technic.set_RE_wear(itemstack, charge, max)
+		local metaRef = itemstack:get_meta()
+		local meta = minetest.deserialize(metaRef:get_string(''))
+		if (not meta) or (not meta.charge) then
+			meta = { charge = 0 }
+		end
+		meta.charge = charge
+		metaRef:set_string('', minetest.serialize(meta))
+	end
+end
+
 -- the function which happens when the replacer is used
 function replacer.replace(itemstack, user, pt, right_clicked)
 	if (not user) or (not pt) then
@@ -235,14 +257,14 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 	end
 
 	local max_nodes = replacer.max_nodes
-	local meta = minetest.deserialize(itemstack:get_metadata())
+	local charge = r.get_charge(itemstack)
 	if replacer.has_technic_mod and (not (creative_enabled or has_give)) then
-		if (not meta) or (not meta.charge) or (meta.charge < replacer.charge_per_node) then
+		if charge < replacer.charge_per_node then
 			r.inform(name, rb.need_more_charge)
 			return
 		end
 
-		local max_charge_to_use = math.min(meta.charge, replacer.max_charge)
+		local max_charge_to_use = math.min(charge, replacer.max_charge)
 		max_nodes = math.floor(max_charge_to_use / replacer.charge_per_node)
 		if max_nodes > replacer.max_nodes then
 			max_nodes = replacer.max_nodes
@@ -303,6 +325,7 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 	replacer.patterns.known_nodes = {}
 
 	if not ps then
+		-- TODO: does this ever happen anymore?
 		r.inform(name, rb.too_many_nodes_detected)
 		return
 	end
@@ -318,8 +341,8 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 
 	local charge_needed = replacer.charge_per_node * num
 	if replacer.has_technic_mod and (not (creative_enabled or has_give)) then
-		if (meta.charge < charge_needed) then
-			num = math.floor(meta.charge / replacer.charge_per_node)
+		if (charge < charge_needed) then
+			num = math.floor(charge / replacer.charge_per_node)
 		end
 	end
 
@@ -333,9 +356,8 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 			r.inform(name, err)
 			if replacer.has_technic_mod and (not technic.creative_mode) then
 				if not (creative_enabled or has_give) then
-					meta.charge = meta.charge - replacer.charge_per_node * i
-					technic.set_RE_wear(itemstack, meta.charge, replacer.max_charge)
-					itemstack:set_metadata(minetest.serialize(meta))
+					charge = charge - replacer.charge_per_node * i
+					r.set_charge(itemstack, charge, replacer.max_charge)
 					return itemstack
 				end
 			end
@@ -345,9 +367,8 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 
 	if replacer.has_technic_mod and (not technic.creative_mode) then
 		if not (creative_enabled or has_give) then
-			meta.charge = meta.charge - charge_needed
-			technic.set_RE_wear(itemstack, meta.charge, replacer.max_charge)
-			itemstack:set_metadata(minetest.serialize(meta))
+			charge = charge - charge_needed
+			r.set_charge(itemstack, charge, replacer.max_charge)
 			return itemstack
 		end
 	end
