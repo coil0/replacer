@@ -58,6 +58,11 @@ replacer.charge_per_node = 15
 -- node count limit
 replacer.max_nodes = tonumber(minetest.settings:get("replacer.max_nodes") or "3168")
 
+-- select which recipes to hide (not all combinations make sense)
+replacer.hide_recipe_basic = 1 == (tonumber(minetest.settings:get('replacer.hide_recipe_basic')) or 0)
+replacer.hide_recipe_technic_upgrade = 1 == (tonumber(minetest.settings:get('replacer.hide_recipe_technic_upgrade')) or 0)
+replacer.hide_recipe_technic_direct = 1 == (tonumber(minetest.settings:get('replacer.hide_recipe_technic_direct')) or 1)
+
 replacer.has_technic_mod = minetest.get_modpath('technic')
 
 -- adds a tool for inspecting nodes and entities
