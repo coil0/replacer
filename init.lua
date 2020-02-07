@@ -19,6 +19,19 @@
 -- Version 3.0
 
 -- Changelog:
+--            * SwissalpS added backward compatibility for non technic servers, restored
+--              creative/give behaviour and fixed the 'too many nodes detected' issue
+--            * S-S-X and some players from pandorabox.io requested and inspired ideas to
+--              implement which SwissalpS tried to satisfy.
+--            * SwissalpS added method to change mode via formspec
+--            * BuckarooBanzay added server-setting max_nodes, moved crafts and replacer to
+--              separate files, added .luacheckrc and cleaned up inspection tool, fixing
+--              some issues on the way and updated readme to look nice
+--            * coil0 made modes available as technic tool and added limits
+--            * OgelGames fixed digging to be simulated properly
+--            * SwissalpS merged Sokomine's and HybridDog's versions
+--            * HybridDog added modes for creative mode
+--            * coil0 fixed issue by using buildable_to
 -- 09.12.2017 * Got rid of outdated minetest.env
 --            * Fixed error in protection function.
 --            * Fixed minor bugs.
