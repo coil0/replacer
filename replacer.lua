@@ -477,7 +477,7 @@ function replacer.common_on_place(itemstack, placer, pt)
 				end
 			end
 			if (not found_item) and (not has_give) then
-				inform(name, rb.not_in_inventory:format(node.name))
+				r.inform(name, rb.not_in_inventory:format(node.name))
 				return
 			end
 		end
