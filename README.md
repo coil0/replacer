@@ -64,7 +64,7 @@ Just wield it and click on any node or entity you want to know more about. A lim
 # Settings
 
 * **replacer.max_nodes** max allowed nodes to replace (default: 3168)
-* **replacer.hide_recipe_basic** hide the basic recipe (default: 0)
+* **replacer.hide_recipe_basic** hide the basic recipe (default: 0)<br>
 These two require technic to be installed, if not they are hidden no matter how you set them
 * **replacer.hide_recipe_technic_upgrade** hide the upgrade recipe (default: 0)
 * **replacer.hide_recipe_technic_direct** hide the direct technic recipe (default: 1)
