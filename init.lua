@@ -69,12 +69,18 @@ replacer.blacklist["protector:protect2"] = true;
 replacer.max_charge = 30000
 replacer.charge_per_node = 15
 -- node count limit
-replacer.max_nodes = tonumber(minetest.settings:get("replacer.max_nodes") or "3168")
+replacer.max_nodes = tonumber(minetest.settings:get("replacer.max_nodes") or 3168)
 
 -- select which recipes to hide (not all combinations make sense)
-replacer.hide_recipe_basic = 1 == (tonumber(minetest.settings:get('replacer.hide_recipe_basic')) or 0)
-replacer.hide_recipe_technic_upgrade = 1 == (tonumber(minetest.settings:get('replacer.hide_recipe_technic_upgrade')) or 0)
-replacer.hide_recipe_technic_direct = 1 == (tonumber(minetest.settings:get('replacer.hide_recipe_technic_direct')) or 1)
+replacer.hide_recipe_basic =
+	minetest.settings:get_bool('replacer.hide_recipe_basic') or false
+replacer.hide_recipe_technic_upgrade =
+	minetest.settings:get_bool('replacer.hide_recipe_technic_upgrade') or false
+replacer.hide_recipe_technic_direct =
+	minetest.settings:get_bool('replacer.hide_recipe_technic_direct')
+if nil == replacer.hide_recipe_technic_direct then
+	replacer.hide_recipe_technic_direct = true
+end
 
 replacer.has_technic_mod = minetest.get_modpath('technic')
 

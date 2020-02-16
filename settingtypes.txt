@@ -1,5 +1,11 @@
-#Replace/place up to this many nodes when using modes other than single.
-#Depending on server hardware and amount of users, this value needs adapting.
-#On singleplayer you can mostly use a higher value.
-#The default is 3168
+# Replace / place up to this many nodes when using modes other than single.
+# Depending on server hardware and amount of users, this value needs adapting.
+# On singleplayer you can mostly use a higher value.
+# The default is 3168
 replacer.max_nodes (Maximum nodes to replace with one click) int 3168
+# You may choose to hide basic recipe but then make sure to enable the technic direct one
+replacer.hide_recipe_basic (Hide basic recipe) bool false
+# Hide the upgrade recipe. Only available if technic is installed.
+replacer.hide_recipe_technic_upgrade (Hide upgrade recipe) bool false
+# Hide the direct upgrade recipe. Only available if technic is installed.
+replacer.hide_recipe_technic_direct (Hide direct recipe) bool true
