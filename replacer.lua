@@ -258,8 +258,9 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 	end
 
 	local max_nodes = replacer.max_nodes
-	local charge = r.get_charge(itemstack)
+	local charge
 	if replacer.has_technic_mod and (not (creative_enabled or has_give)) then
+		charge = r.get_charge(itemstack)
 		if charge < replacer.charge_per_node then
 			r.inform(name, rb.need_more_charge)
 			return
