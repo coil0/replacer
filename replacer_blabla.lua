@@ -26,4 +26,7 @@ replacer.blabla.not_in_inventory = 'Item not in your inventory: "%s".'
 replacer.blabla.set_to = 'Node replacement tool set to: "%s".'
 replacer.blabla.description_basic = "Node replacement tool"
 replacer.blabla.description_technic = "Node replacement tool (technic)"
+replacer.blabla.limit_override = 'Setting already set node-limit for "%s" was %d.'
+replacer.blabla.limit_insert = 'Setting node-limit for "%s" to %d.'
+replacer.blabla.blacklist_insert = 'Blacklisted "%s".'
 

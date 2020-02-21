@@ -28,6 +28,33 @@ replacer.mode_colours[r.modes[2]] = "#54FFAC"
 replacer.mode_colours[r.modes[3]] = "#9F6200"
 replacer.mode_colours[r.modes[4]] = "#FF5457"
 
+local is_int = function(value)
+	return type(value) == 'number' and math.floor(value) == value
+end
+
+function replacer.register_limit(node_name, node_max)
+	-- ignore nil and negative numbers
+	if (nil == node_max) or (0 > node_max) then
+		return
+	end
+	-- ignore non-integers
+	if not is_int(node_max) then
+		return
+	end
+	-- add to blacklist if limit is zero
+	if 0 == node_max then
+		replacer.blacklist[node_name] = true
+		minetest.log("info", rb.blacklist_insert:format(node_name))
+		return
+	end
+	-- log info if already limited
+	if nil ~= r.limit_list[node_name] then
+		minetest.log("info", rb.limit_override:format(node_name, r.limit_list[node_name]))
+	end
+	r.limit_list[node_name] = node_max
+	minetest.log("info", rb.limit_insert:format(node_name, node_max))
+end
+
 function replacer.get_data(stack)
 	local metaRef = stack:get_meta()
 	local data = metaRef:get_string("replacer"):split(" ") or {}
@@ -257,7 +284,7 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 		return
 	end
 
-	local max_nodes = replacer.max_nodes
+	local max_nodes = r.limit_list[nnd.name] or r.max_nodes
 	local charge
 	if replacer.has_technic_mod and (not (creative_enabled or has_give)) then
 		charge = r.get_charge(itemstack)

@@ -52,6 +52,10 @@ local path = minetest.get_modpath("replacer")
 
 replacer = {}
 
+-- limit by node, use replacer.register_limit(sName, iMax)
+replacer.limit_list = {}
+
+-- don't allow these at all
 replacer.blacklist = {}
 
 -- playing with tnt and creative building are usually contradictory
