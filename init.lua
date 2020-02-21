@@ -52,18 +52,18 @@ local path = minetest.get_modpath("replacer")
 
 replacer = {}
 
-replacer.blacklist = {};
+replacer.blacklist = {}
 
 -- playing with tnt and creative building are usually contradictory
 -- (except when doing large-scale landscaping in singleplayer)
-replacer.blacklist["tnt:boom"] = true;
-replacer.blacklist["tnt:gunpowder"] = true;
-replacer.blacklist["tnt:gunpowder_burning"] = true;
-replacer.blacklist["tnt:tnt"] = true;
+replacer.blacklist["tnt:boom"] = true
+replacer.blacklist["tnt:gunpowder"] = true
+replacer.blacklist["tnt:gunpowder_burning"] = true
+replacer.blacklist["tnt:tnt"] = true
 
 -- prevent accidental replacement of your protector
-replacer.blacklist["protector:protect"] = true;
-replacer.blacklist["protector:protect2"] = true;
+replacer.blacklist["protector:protect"] = true
+replacer.blacklist["protector:protect2"] = true
 
 -- charge limits
 replacer.max_charge = 30000
