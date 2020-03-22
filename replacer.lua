@@ -11,7 +11,7 @@ function replacer.inform(name, msg)
 	minetest.log("info", rb.log:format(name, msg))
 end
 
-replacer.modes = { "single", "field", "crust", "chunkborder" }
+replacer.modes = {"single", "field", "crust"}
 for n = 1, #r.modes do
 	r.modes[r.modes[n]] = n
 end
@@ -20,13 +20,11 @@ replacer.mode_infos = {}
 replacer.mode_infos[r.modes[1]] = rb.mode_single
 replacer.mode_infos[r.modes[2]] = rb.mode_field
 replacer.mode_infos[r.modes[3]] = rb.mode_crust
-replacer.mode_infos[r.modes[4]] = rb.mode_chunkborder
 
 replacer.mode_colours = {}
 replacer.mode_colours[r.modes[1]] = "#ffffff"
 replacer.mode_colours[r.modes[2]] = "#54FFAC"
 replacer.mode_colours[r.modes[3]] = "#9F6200"
-replacer.mode_colours[r.modes[4]] = "#FF5457"
 
 local is_int = function(value)
 	return type(value) == 'number' and math.floor(value) == value
@@ -129,14 +127,6 @@ function replacer.get_form_modes(current_mode)
 		formspec = formspec .. "mode;" .. r.modes[3] .. "]"
 	end
 	-- TODO: enable mode when it is available
-	--[[
-	formspec = formspec .. "button_exit[1.9,1.4;2,0.5;"
-	if r.modes[4] == current_mode then
-		formspec = formspec .. "_;< " .. r.modes[4] .. " >]"
-	else
-		formspec = formspec .. "mode;" .. r.modes[4] .. "]"
-	end
-	--]]
 	return formspec
 end -- get_form_modes
 
@@ -225,14 +215,14 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 	if (not user) or (not pt) then
 		return
 	end
-	
+
 	local keys = user:get_player_control()
 	local name = user:get_player_name()
 	local creative_enabled = creative.is_enabled_for(name)
 	local has_give = minetest.check_player_privs(name, "give")
 	local is_technic = itemstack:get_name() == replacer.tool_name_technic
 	local modes_are_available = is_technic or has_give or creative_enabled
-	
+
 	-- is special-key held? (aka fast-key)
 	if keys.aux1 then
 		if not modes_are_available then return itemstack end
@@ -273,7 +263,7 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 	if not modes_are_available then
 		mode = r.modes[1]
 	end
-	
+
 	if r.modes[1] == mode then
 		-- single
 		local succ, err = replacer.replace_single_node(pos, node_toreplace, nnd, user,
@@ -344,10 +334,6 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 				end
 			end
 		end
-	elseif r.modes[4] == mode then
-		-- chunkborder
-		ps, num = rp.get_ps(pos, { func = rp.mantle_position, name = node_toreplace.name,
-			pname = name }, nil, max_nodes)
 	end
 
 	-- reset known nodes table
@@ -448,7 +434,7 @@ function replacer.common_on_place(itemstack, placer, pt)
 
 	local node, mode = r.get_data(itemstack)
 	node = minetest.get_node_or_nil(pt.under) or node
-	
+
 	if not modes_are_available then
 		mode = r.modes[1]
 	end
