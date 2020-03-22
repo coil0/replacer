@@ -74,6 +74,8 @@ replacer.max_charge = 30000
 replacer.charge_per_node = 15
 -- node count limit
 replacer.max_nodes = tonumber(minetest.settings:get("replacer.max_nodes") or 3168)
+-- Time limit when placing the nodes, in seconds
+replacer.max_time = tonumber(minetest.settings:get("replacer.max_time") or 1.0)
 
 -- select which recipes to hide (not all combinations make sense)
 replacer.hide_recipe_basic =

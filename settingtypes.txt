@@ -3,6 +3,9 @@
 # On singleplayer you can mostly use a higher value.
 # The default is 3168
 replacer.max_nodes (Maximum nodes to replace with one click) int 3168
+# Some nodes take a long time to be placed. This value limits the time
+# in seconds in which the nodes are placed.
+replacer.max_time (Time limit when putting nodes) float 1.0
 # You may choose to hide basic recipe but then make sure to enable the technic direct one
 replacer.hide_recipe_basic (Hide basic recipe) bool false
 # Hide the upgrade recipe. Only available if technic is installed.
