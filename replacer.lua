@@ -28,6 +28,9 @@ replacer.mode_colours[r.modes[2]] = "#54FFAC"
 replacer.mode_colours[r.modes[3]] = "#9F6200"
 replacer.mode_colours[r.modes[4]] = "#FF5457"
 
+local path = minetest.get_modpath("replacer")
+local datastructures = dofile(path .. "/datastructures.lua")
+
 local is_int = function(value)
 	return type(value) == 'number' and math.floor(value) == value
 end
@@ -82,6 +85,7 @@ function replacer.set_data(stack, node, mode)
 	return metadata
 end
 
+local discharge_replacer
 if replacer.has_technic_mod then
 	-- technic still stores data serialized, so this is the nearest we get to current standard
 	function replacer.get_charge(itemstack)
@@ -102,6 +106,17 @@ if replacer.has_technic_mod then
 		meta.charge = charge
 		metaRef:set_string('', minetest.serialize(meta))
 	end
+
+	function discharge_replacer(creative_enabled, has_give, charge, itemstack,
+			num_nodes)
+		if not technic.creative_mode and not (creative_enabled or has_give) then
+			charge = charge - replacer.charge_per_node * num_nodes
+			r.set_charge(itemstack, charge, replacer.max_charge)
+			return itemstack
+		end
+	end
+else
+	function discharge_replacer() end
 end
 
 replacer.form_name_modes = "replacer_replacer_mode_change"
@@ -225,14 +240,14 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 	if (not user) or (not pt) then
 		return
 	end
-	
+
 	local keys = user:get_player_control()
 	local name = user:get_player_name()
 	local creative_enabled = creative.is_enabled_for(name)
 	local has_give = minetest.check_player_privs(name, "give")
 	local is_technic = itemstack:get_name() == replacer.tool_name_technic
 	local modes_are_available = is_technic or has_give or creative_enabled
-	
+
 	-- is special-key held? (aka fast-key)
 	if keys.aux1 then
 		if not modes_are_available then return itemstack end
@@ -273,7 +288,7 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 	if not modes_are_available then
 		mode = r.modes[1]
 	end
-	
+
 	if r.modes[1] == mode then
 		-- single
 		local succ, err = replacer.replace_single_node(pos, node_toreplace, nnd, user,
@@ -376,21 +391,39 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 	end
 
 	-- set nodes
+	local t_start = minetest.get_us_time()
+	-- TODO
+	local max_time_us = 1000000 * replacer.max_time
+	-- Turn ps into a binary heap
+	datastructures.create_binary_heap({
+		input = ps,
+		n = num,
+		compare = function(pos1, pos2)
+			-- Return true iff pos1 is nearer to the start position than pos2
+			local n1 = (pos1.x - pos.x) ^ 2 + (pos1.y - pos.y) ^ 2 +
+				(pos1.z - pos.z) ^ 2
+			local n2 = (pos2.x - pos.x) ^ 2 + (pos2.y - pos.y) ^ 2 +
+				(pos2.z - pos.z) ^ 2
+			return n1 < n2
+		end,
+	})
 	local inv = user:get_inventory()
-	for i = 1, num do
-		local pos = ps[i]
+	local num_nodes = 0
+	while not ps:is_empty() do
+		num_nodes = num_nodes+1
+		-- Take the position nearest to the start position
+		local pos = ps:take()
 		local succ, err = r.replace_single_node(pos, minetest.get_node(pos), nnd,
 			user, name, inv, creative_enabled)
 		if not succ then
 			r.inform(name, err)
-			if replacer.has_technic_mod and (not technic.creative_mode) then
-				if not (creative_enabled or has_give) then
-					charge = charge - replacer.charge_per_node * i
-					r.set_charge(itemstack, charge, replacer.max_charge)
-					return itemstack
-				end
-			end
-			return
+			return discharge_replacer(creative_enabled, has_give, charge,
+				itemstack, num_nodes)
+		end
+		if minetest.get_us_time() - t_start > max_time_us then
+			r.inform(name, "Too much time has elapsed")
+			return discharge_replacer(creative_enabled, has_give, charge,
+				itemstack, num_nodes)
 		end
 	end
 
@@ -448,7 +481,7 @@ function replacer.common_on_place(itemstack, placer, pt)
 
 	local node, mode = r.get_data(itemstack)
 	node = minetest.get_node_or_nil(pt.under) or node
-	
+
 	if not modes_are_available then
 		mode = r.modes[1]
 	end
