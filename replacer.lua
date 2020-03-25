@@ -11,7 +11,7 @@ function replacer.inform(name, msg)
 	minetest.log("info", rb.log:format(name, msg))
 end
 
-replacer.modes = { "single", "field", "crust", "chunkborder" }
+replacer.modes = {"single", "field", "crust"}
 for n = 1, #r.modes do
 	r.modes[r.modes[n]] = n
 end
@@ -20,13 +20,11 @@ replacer.mode_infos = {}
 replacer.mode_infos[r.modes[1]] = rb.mode_single
 replacer.mode_infos[r.modes[2]] = rb.mode_field
 replacer.mode_infos[r.modes[3]] = rb.mode_crust
-replacer.mode_infos[r.modes[4]] = rb.mode_chunkborder
 
 replacer.mode_colours = {}
 replacer.mode_colours[r.modes[1]] = "#ffffff"
 replacer.mode_colours[r.modes[2]] = "#54FFAC"
 replacer.mode_colours[r.modes[3]] = "#9F6200"
-replacer.mode_colours[r.modes[4]] = "#FF5457"
 
 local path = minetest.get_modpath("replacer")
 local datastructures = dofile(path .. "/datastructures.lua")
@@ -144,14 +142,6 @@ function replacer.get_form_modes(current_mode)
 		formspec = formspec .. "mode;" .. r.modes[3] .. "]"
 	end
 	-- TODO: enable mode when it is available
-	--[[
-	formspec = formspec .. "button_exit[1.9,1.4;2,0.5;"
-	if r.modes[4] == current_mode then
-		formspec = formspec .. "_;< " .. r.modes[4] .. " >]"
-	else
-		formspec = formspec .. "mode;" .. r.modes[4] .. "]"
-	end
-	--]]
 	return formspec
 end -- get_form_modes
 
@@ -359,10 +349,6 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 				end
 			end
 		end
-	elseif r.modes[4] == mode then
-		-- chunkborder
-		ps, num = rp.get_ps(pos, { func = rp.mantle_position, name = node_toreplace.name,
-			pname = name }, nil, max_nodes)
 	end
 
 	-- reset known nodes table
