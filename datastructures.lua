@@ -4,13 +4,13 @@ local stack_mt
 stack_mt = {
 	__index = {
 		push = function(self, v)
-			self.n = self.n+1
+			self.n = self.n + 1
 			self[self.n] = v
 		end,
 		pop = function(self)
 			local v = self[self.n]
 			self[self.n] = nil
-			self.n = self.n-1
+			self.n = self.n - 1
 			return v
 		end,
 		top = function(self)
@@ -31,7 +31,7 @@ stack_mt = {
 		clone = function(self, copy_element)
 			local stack
 			if copy_element then
-				stack = {n = self.n, true}
+				stack = { n = self.n, true }
 				for i = 1, self.n do
 					stack[i] = copy_element(self[i])
 				end
@@ -73,7 +73,7 @@ function funcs.create_stack(data)
 	else
 		-- setting the first element to true makes it ~10 times faster with
 		-- luajit when the stack always contains less or equal to one element
-		stack = {n = 0, true}
+		stack = { n = 0, true }
 	end
 	setmetatable(stack, stack_mt)
 	return stack
@@ -84,7 +84,7 @@ local fifo_mt
 fifo_mt = {
 	__index = {
 		add = function(self, v)
-			local n = self.n_in+1
+			local n = self.n_in + 1
 			self.n_in = n
 			self.sink[n] = v
 		end,
@@ -93,7 +93,7 @@ fifo_mt = {
 			if p <= self.n_out then
 				local v = self.source[p]
 				self.source[p] = nil
-				self.p_out = p+1
+				self.p_out = p + 1
 				return v
 			end
 			-- source is empty, swap it with sink
@@ -114,7 +114,7 @@ fifo_mt = {
 			return self.sink[1]
 		end,
 		is_empty = function(self)
-			return self.n_in == 0 and self.p_out == self.n_out+1
+			return self.n_in == 0 and self.p_out == self.n_out + 1
 		end,
 		size = function(self)
 			return self.n_in + self.n_out - self.p_out + 1
@@ -126,8 +126,8 @@ fifo_mt = {
 					source[i] = copy_element(source[i])
 				end
 			end
-			local fifo = {n_in = 0, n_out = n, p_out = 1,
-				sink = {true}, source = source}
+			local fifo = { n_in = 0, n_out = n, p_out = 1,
+				sink = { true }, source = source }
 			setmetatable(fifo, fifo_mt)
 			return fifo
 		end,
@@ -136,13 +136,13 @@ fifo_mt = {
 			local k = 1
 			for i = self.p_out, self.n_out do
 				t[k] = self.source[i]
-				k = k+1
+				k = k + 1
 			end
 			for i = 1, self.n_in do
 				t[k] = self.sink[i]
-				k = k+1
+				k = k + 1
 			end
-			return t, k-1
+			return t, k - 1
 		end,
 		to_string = function(self, value_tostring)
 			local size = self:size()
@@ -164,10 +164,10 @@ function funcs.create_queue(data)
 	local fifo
 	if type(data) == "table"
 	and data.input then
-		fifo = {n_in = 0, n_out = data.n or #data.input, p_out = 1,
-			sink = {true}, source = data.input}
+		fifo = { n_in = 0, n_out = data.n or #data.input, p_out = 1,
+			sink = { true }, source = data.input }
 	else
-		fifo = {n_in = 0, n_out = 0, p_out = 1, sink = {true}, source = {true}}
+		fifo = { n_in = 0, n_out = 0, p_out = 1, sink = { true }, source = { true } }
 	end
 	setmetatable(fifo, fifo_mt)
 	return fifo
@@ -189,7 +189,7 @@ local function sift_down(binary_heap, i)
 	local n = binary_heap.n
 	while true do
 		local l = i + i
-		local r = l+1
+		local r = l + 1
 		if l > n then
 			break
 		end
@@ -224,7 +224,7 @@ binary_heap_mt = {
 			return self[1]
 		end,
 		add = function(self, v)
-			local i = self.n+1
+			local i = self.n + 1
 			self.n = i
 			self[i] = v
 			sift_up(self, i)
@@ -233,7 +233,7 @@ binary_heap_mt = {
 			local v = self[1]
 			self[1] = self[self.n]
 			self[self.n] = nil
-			self.n = self.n-1
+			self.n = self.n - 1
 			sift_down(self, 1)
 			return v
 		end,
@@ -290,7 +290,7 @@ binary_heap_mt = {
 		sort = function(self)
 			for i = self.n, 1, -1 do
 				self[i], self[1] = self[1], self[i]
-				self.n = self.n-1
+				self.n = self.n - 1
 				sift_down(self, 1)
 			end
 			setmetatable(self, nil)
@@ -330,7 +330,7 @@ function funcs.create_binary_heap(data)
 		end
 		compare = data.compare
 	end
-	local binary_heap = {compare = compare, n = 0, true}
+	local binary_heap = { compare = compare, n = 0, true }
 	setmetatable(binary_heap, binary_heap_mt)
 	return binary_heap
 end

@@ -28,4 +28,4 @@ replacer.blabla.description_technic = "Node replacement tool (technic)"
 replacer.blabla.limit_override = 'Setting already set node-limit for "%s" was %d.'
 replacer.blabla.limit_insert = 'Setting node-limit for "%s" to %d.'
 replacer.blabla.blacklist_insert = 'Blacklisted "%s".'
-
+replacer.blabla.timed_out = 'Time-limit reached.'

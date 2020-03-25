@@ -107,7 +107,7 @@ if replacer.has_technic_mod then
 
 	function discharge_replacer(creative_enabled, has_give, charge, itemstack,
 			num_nodes)
-		if not technic.creative_mode and not (creative_enabled or has_give) then
+		if (not technic.creative_mode) and (not (creative_enabled or has_give)) then
 			charge = charge - replacer.charge_per_node * num_nodes
 			r.set_charge(itemstack, charge, replacer.max_charge)
 			return itemstack
@@ -141,7 +141,6 @@ function replacer.get_form_modes(current_mode)
 	else
 		formspec = formspec .. "mode;" .. r.modes[3] .. "]"
 	end
-	-- TODO: enable mode when it is available
 	return formspec
 end -- get_form_modes
 
@@ -407,7 +406,7 @@ function replacer.replace(itemstack, user, pt, right_clicked)
 				itemstack, num_nodes)
 		end
 		if minetest.get_us_time() - t_start > max_time_us then
-			r.inform(name, "Too much time has elapsed")
+			r.inform(name, rb.timed_out)
 			return discharge_replacer(creative_enabled, has_give, charge,
 				itemstack, num_nodes)
 		end
