@@ -193,7 +193,11 @@ function replacer.replace_single_node(pos, node, nnd, player, name, inv, creativ
 	-- (other than the pointed_thing)
 	local newitem, succ = new_ndef.on_place(ItemStack(nnd.name), player,
 		{ type = "node", under = vector.new(pos), above = vector.new(pos) })
-	if false == succ then
+	-- replacing with trellis set, succ is returned but newitem is nil
+	-- possible that other nodes react the same way.
+	-- this allows users to dig nodes, I don't see reason to stop that
+	-- as long as no crash occurs - SwissalpS
+	if (false == succ) or (nil == newitem) then
 		return false, rb.can_not_place:format(nnd.name)
 	end
 
