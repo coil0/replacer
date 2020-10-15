@@ -2,8 +2,9 @@
 
 ### Left click:
 The replacer changes visually adjacent nodes (of the same type) on a surface 
-
+![crust_left_click_0_015353](https://user-images.githubusercontent.com/161979/96197649-02496a00-0f53-11eb-9538-d809689d51fb.png)
 Before is depicted above and after is below.
+![crust_left_click_1_015402](https://user-images.githubusercontent.com/161979/96197651-02e20080-0f53-11eb-9e72-f1ccecceb09c.png)
 
 
 ### Right click:
