@@ -52,7 +52,7 @@ replacer.inspect = function(_, user, pointed_thing, mode, show_receipe)
 		local text = 'This is '
 		local ref = pointed_thing.ref
 		if (not(ref)) then
-			text = text..'a broken object. We have no further information about it. It is located'
+			text = text..'a broken object. We have no further information about it.\nIt is located'
 		elseif (ref:is_player()) then
 			text = text..'your fellow player \"'..tostring(ref:get_player_name())..'\"'
 		else
@@ -82,8 +82,8 @@ replacer.inspect = function(_, user, pointed_thing, mode, show_receipe)
 		minetest.chat_send_player(name, text)
 		return nil
 	elseif (pointed_thing.type ~= 'node') then
-		minetest.chat_send_player(name, 'Sorry. This is an unkown something of type \"'..
-			tostring(pointed_thing.type)..'\". No information available.')
+		minetest.chat_send_player(name, 'Sorry. This is an unkown something of type\n\"'..
+			tostring(pointed_thing.type)..'\".\nNo information available.')
 		return nil
 	end
 
@@ -91,14 +91,14 @@ replacer.inspect = function(_, user, pointed_thing, mode, show_receipe)
 	local node = minetest.get_node_or_nil(pos)
 
 	if (node == nil) then
-		minetest.chat_send_player(name, "Error: Target node not yet loaded. Please wait a moment for the server to catch up.")
+		minetest.chat_send_player(name, "Error: Target node not yet loaded.\nPlease wait a moment for the server to catch up.")
 		return nil
 	end
 
 	local text = ' ['..tostring(node.name)..'] with param2='..tostring(node.param2)..
 		' at '..minetest.pos_to_string(pos)..'.'
 	if (not(minetest.registered_nodes[node.name])) then
-		text = 'This node is an UNKOWN block'..text
+		text = 'This node is UNKOWN'..text
 	else
 		text = 'This is a \"'..tostring(minetest.registered_nodes[node.name].description or
 		' - no description provided -')..'\" block'..text
@@ -256,11 +256,11 @@ replacer.inspect_show_crafting = function(name, node_name, fields)
 	if (	 minetest.registered_nodes[node_name]) then
 		if (	 minetest.registered_nodes[node_name].description
 			and minetest.registered_nodes[node_name].description~= "") then
-			desc = "\""..minetest.registered_nodes[node_name].description.."\" block"
+			desc = "\""..minetest.registered_nodes[node_name].description.."\" node"
 		elseif (minetest.registered_nodes[node_name].name) then
-			desc = "\""..minetest.registered_nodes[node_name].name.."\" block"
+			desc = "\""..minetest.registered_nodes[node_name].name.."\" node"
 		else
-			desc = " - no description provided - block"
+			desc = " - no description provided - node"
 		end
 	elseif (minetest.registered_items[node_name]) then
 		if (	 minetest.registered_items[node_name].description
@@ -293,7 +293,7 @@ replacer.inspect_show_crafting = function(name, node_name, fields)
 			formspec = formspec.." with param2="..tostring(fields.param2)
 		end
 		if (fields.light) then
-			formspec = formspec.." and receiving "..tostring(fields.light).." light"
+			formspec = formspec.."\nand receiving "..tostring(fields.light).." light"
 		end
 		formspec = formspec..".]"
 	end
