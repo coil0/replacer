@@ -19,6 +19,7 @@
 -- Version 3.0
 
 -- Changelog:
+-- 15.10.2020 * SwissalpS cleaned up inspector code and made inspector better readable on smaller screens
 --            * SwissalpS added backward compatibility for non technic servers, restored
 --              creative/give behaviour and fixed the 'too many nodes detected' issue
 --            * S-S-X and some players from pandorabox.io requested and inspired ideas to
