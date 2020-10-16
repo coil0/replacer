@@ -1,14 +1,14 @@
 ## Single Mode
 
 ### Left click:
-The replacer changes visually adjacent nodes (of the same type) on a surface.
+The replacer changes the clicked node.
 
 
 Before is depicted above and after is below.
 
 
 ### Right click:
-The replacer places nodes onto the surface so that the surface below it is hidden; the added crust can be bounded by other solid nodes but not translucent nodes.
+The replacer places a node onto the surface.
 
 ![single_right_click_0_023544](https://user-images.githubusercontent.com/161979/96200006-27d97200-0f59-11eb-9928-58491380fe15.png)
 Before is depicted above and after is below.
