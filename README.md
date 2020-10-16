@@ -48,7 +48,10 @@ This is true for users without "give" privs and also on servers not running in c
 
 Special-right-click on a node or special-left-click anywhere to change the mode.
 Single-mode does not need any charge. The other modes do.
-For a description of the modes with pictures, refer to doc/usage.md.
+For a description of the modes with pictures, refer to [doc/usage.md](doc/usage.md).
+* [Single Mode (doc/usageSingle.md)](doc/usageSingle.md)
+* [Field Mode (doc/usageField.md)](doc/usageField.md)
+* [Crust Mode (doc/usageCrust.md)](doc/usageCrust.md)
 
 # Inspection tool
 
