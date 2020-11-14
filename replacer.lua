@@ -73,13 +73,26 @@ end
 
 function replacer.set_data(stack, node, mode)
 	mode = mode or r.modes[1]
-	local metadata = (node.name or replacer.tool_default_node) .. " "
-		.. tostring(node.param1 or 0) .. " "
-		.. tostring(node.param2 or 0)
+	local param1 = tostring(node.param1 or 0)
+	local param2 = tostring(node.param2 or 0)
+	local nodeName = node.name or replacer.tool_default_node
+	local metadata = nodeName .. " " .. param1 .. " " .. param2
 	local metaRef = stack:get_meta()
 	metaRef:set_string("mode", mode)
 	metaRef:set_string("replacer", metadata)
 	metaRef:set_string("color", r.mode_colours[mode])
+	local nodeDescription = nodeName
+	if minetest.registered_items[node.name]
+		and minetest.registered_items[node.name].description
+	then
+		nodeDescription = minetest.registered_items[node.name].description
+	end
+	local toolItemName = stack:get_name()
+	local toolName = minetest.registered_items[toolItemName].description
+	local description = toolName .. "\n"
+		.. param1 .. " " .. param2 .. " " .. nodeDescription -- .. "\n" .. mode
+
+	metaRef:set_string("description", description)
 	return metadata
 end
 
