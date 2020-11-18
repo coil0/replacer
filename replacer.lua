@@ -89,11 +89,13 @@ function replacer.set_data(stack, node, mode)
 	end
 	local toolItemName = stack:get_name()
 	local toolName = minetest.registered_items[toolItemName].description
+	local short_description = "(" .. param1 .. " " .. param2 .. ") " .. node.name
 	local description = toolName .. "\n"
-		.. param1 .. " " .. param2 .. " " .. nodeDescription -- .. "\n" .. mode
+		.. short_description .. "\n"
+		.. nodeDescription
 
 	metaRef:set_string("description", description)
-	return metadata
+	return short_description
 end
 
 local discharge_replacer
@@ -546,9 +548,9 @@ function replacer.common_on_place(itemstack, placer, pt)
 		end
 	end
 
-	local metadata = r.set_data(itemstack, node, mode)
+	local short_description = r.set_data(itemstack, node, mode)
 
-	r.inform(name, rb.set_to:format(metadata))
+	r.inform(name, rb.set_to:format(short_description))
 
 	return itemstack --data changed
 end -- common_on_place
