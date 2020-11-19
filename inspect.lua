@@ -54,7 +54,7 @@ replacer.inspect = function(_, user, pointed_thing, mode)
 		else
 			local luaob = ref:get_luaentity()
 			if luaob and luaob.get_staticdata then
-				text = text .. 'entity "' .. luaob.name .. '"'
+				text = text .. 'an entity "' .. luaob.name .. '"'
 				local sdata = luaob:get_staticdata()
 				if 0 < #sdata then
 					sdata = minetest.deserialize(sdata) or {}
@@ -75,8 +75,10 @@ replacer.inspect = function(_, user, pointed_thing, mode)
 							.. ' minutes ago'
 					end
 				end
+			elseif luaob
+				text = text .. 'an object "' .. luaob.name .. '"'
 			else
-				text = text .. 'object "' .. ref:get_entity_name() .. '"'
+				text = text .. 'an object'
 			end
 
 		end
