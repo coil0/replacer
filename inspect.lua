@@ -75,7 +75,7 @@ replacer.inspect = function(_, user, pointed_thing, mode)
 							.. ' minutes ago'
 					end
 				end
-			elseif luaob
+			elseif luaob then
 				text = text .. 'an object "' .. luaob.name .. '"'
 			else
 				text = text .. 'an object'
