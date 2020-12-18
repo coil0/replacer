@@ -286,6 +286,10 @@ replacer.inspect_show_crafting = function(player_name, node_name, fields)
 	if not res then
 		res = {}
 	end
+--print(dump(res))
+	-- TODO: filter out invalid recipes with no items
+	--       such as "group:flower,color_dark_grey"
+	--
 
 	-- add special recipes for nodes created by machines
 	replacer.add_circular_saw_recipe(node_name, res)
@@ -398,6 +402,7 @@ replacer.inspect_show_crafting = function(player_name, node_name, fields)
 		-- reverse order; default recipes (and thus the most intresting ones)
 		-- are usually the oldest
 		local recipe = res[#res + 1 - recipe_nr]
+--print(dump(recipe))
 		if 'normal' == recipe.type and recipe.items then
 			local width = recipe.width
 			if not width or 0 == width then
