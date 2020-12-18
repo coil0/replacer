@@ -89,6 +89,8 @@ if nil == replacer.hide_recipe_technic_direct then
 	replacer.hide_recipe_technic_direct = true
 end
 
+replacer.has_colormachine_mod = minetest.get_modpath('colormachine')
+								and minetest.global_exists('colormachine')
 replacer.has_technic_mod = minetest.get_modpath('technic')
 								and minetest.global_exists('technic')
 replacer.has_unifieddyes_mod = minetest.get_modpath('unifieddyes')
