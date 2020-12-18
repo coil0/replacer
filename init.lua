@@ -89,6 +89,7 @@ if nil == replacer.hide_recipe_technic_direct then
 	replacer.hide_recipe_technic_direct = true
 end
 
+replacer.has_bakedclay = minetest.get_modpath('bakedclay')
 replacer.has_basic_dyes = minetest.get_modpath('dye')
 								and minetest.global_exists('dye')
 								and dye.basecolors
