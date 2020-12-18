@@ -61,7 +61,12 @@ end
 
 
 function replacer.unifieddyes.isAirbrushed(nodeDef)
-	return replacer.unifieddyes.isAirbrushCompatible(nodeDef)
-		and (not nodeDef.airbrush_replacement_node)
+	if not replacer.unifieddyes.isAirbrushCompatible(nodeDef) then
+		return false
+	end
+	if nil ~= nodeDef.name:find('_tinted$') then
+		return true
+	end
+	return not nodeDef.airbrush_replacement_node
 end
 
