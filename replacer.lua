@@ -5,6 +5,7 @@ replacer.tool_default_node = "default:dirt"
 local r = replacer
 local rb = replacer.blabla
 local rp = replacer.patterns
+local rud = replacer.unifieddyes
 
 function replacer.inform(name, msg)
 	minetest.chat_send_player(name, msg)
@@ -86,7 +87,10 @@ function replacer.set_data(stack, node, mode)
 	if nodeDef and nodeDef.description then
 		nodeDescription = nodeDef.description
 	end
-	local colourName = r.colourName(param2, nodeDef)
+	local colourName = rud.colourName(param2, nodeDef)
+	if 0 < #colourName then
+		colourName = " " .. colourName
+	end
 	local toolItemName = stack:get_name()
 	local toolName = minetest.registered_items[toolItemName].description
 	local short_description = "(" .. param1 .. " " .. param2
