@@ -226,6 +226,7 @@ replacer.inspect_show_crafting = function(player_name, node_name, fields)
 	if not player_name then
 		return
 	end
+
 	local recipe_nr = 1
 	if not node_name then
 		node_name  = fields.node_name
@@ -254,6 +255,7 @@ replacer.inspect_show_crafting = function(player_name, node_name, fields)
 	if not res then
 		res = {}
 	end
+
 	-- add special recipes for nodes created by machines
 	replacer.add_circular_saw_recipe(node_name, res)
 	replacer.add_colormachine_recipe(node_name, res)
