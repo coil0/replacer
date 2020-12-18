@@ -103,6 +103,10 @@ replacer.has_technic_mod = minetest.get_modpath('technic')
 replacer.has_unifieddyes_mod = minetest.get_modpath('unifieddyes')
 								and minetest.global_exists('unifieddyes')
 
+-- utilities
+dofile(path .. "/utils.lua")
+-- unifiedddyes support functions
+dofile(path .. "/unifieddyes.lua")
 -- adds a tool for inspecting nodes and entities
 dofile(path .. "/inspect.lua")
 dofile(path .. "/replacer_blabla.lua")
