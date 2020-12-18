@@ -90,6 +90,9 @@ if nil == replacer.hide_recipe_technic_direct then
 end
 
 replacer.has_technic_mod = minetest.get_modpath('technic')
+								and minetest.global_exists('technic')
+replacer.has_unifieddyes_mod = minetest.get_modpath('unifieddyes')
+								and minetest.global_exists('unifieddyes')
 
 -- adds a tool for inspecting nodes and entities
 dofile(path .. "/inspect.lua")
