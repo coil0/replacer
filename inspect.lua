@@ -223,8 +223,8 @@ replacer.add_colormachine_recipe = function(node_name, recipes)
 end
 
 
-replacer.inspect_show_crafting = function(name, node_name, fields)
-	if not name then
+replacer.inspect_show_crafting = function(player_name, node_name, fields)
+	if not player_name then
 		return
 	end
 	local recipe_nr = 1
