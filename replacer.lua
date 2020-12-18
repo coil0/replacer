@@ -56,6 +56,34 @@ function replacer.register_limit(node_name, node_max)
 	minetest.log("info", rb.limit_insert:format(node_name, node_max))
 end
 
+-- from: http://lua-users.org/wiki/StringRecipes
+local function titleCase(str)
+	local function titleCaseHelper(first, rest)
+		return first:upper() .. rest:lower()
+	end
+	-- Add extra characters to the pattern if you need to. _ and ' are
+	--  found in the middle of identifiers and English words.
+	-- We must also put %w_' into [%w_'] to make it handle normal stuff
+	-- and extra stuff the same.
+	-- This also turns hex numbers into, eg. 0Xa7d4
+	str = str:gsub("(%a)([%w_']*)", titleCaseHelper)
+	return str
+end
+
+function replacer.colourName(param2, def)
+	param2 = tonumber(param2)
+	if r.has_unifieddyes_mod and param2 and def and def.palette
+		and def.groups and def.groups.ud_param2_colorable
+		and 0 < def.groups.ud_param2_colorable
+	then
+		local s = unifieddyes.make_readable_color(
+			unifieddyes.color_to_name(param2, def))
+		return ' ' .. s
+	else
+		return ''
+	end
+end
+
 function replacer.get_data(stack)
 	local metaRef = stack:get_meta()
 	local data = metaRef:get_string("replacer"):split(" ") or {}
@@ -81,18 +109,19 @@ function replacer.set_data(stack, node, mode)
 	metaRef:set_string("mode", mode)
 	metaRef:set_string("replacer", metadata)
 	metaRef:set_string("color", r.mode_colours[mode])
+	local nodeDef = minetest.registered_items[node.name]
 	local nodeDescription = nodeName
-	if minetest.registered_items[node.name]
-		and minetest.registered_items[node.name].description
-	then
-		nodeDescription = minetest.registered_items[node.name].description
+	if nodeDef and nodeDef.description then
+		nodeDescription = nodeDef.description
 	end
+	local colourName = r.colourName(param2, nodeDef)
 	local toolItemName = stack:get_name()
 	local toolName = minetest.registered_items[toolItemName].description
-	local short_description = "(" .. param1 .. " " .. param2 .. ") " .. node.name
+	local short_description = "(" .. param1 .. " " .. param2
+								.. colourName .. ") " .. node.name
 	local description = toolName .. "\n"
 		.. short_description .. "\n"
-		.. nodeDescription
+		.. nodeDescription -- .. titleCase(colourName)
 
 	metaRef:set_string("description", description)
 	return short_description
