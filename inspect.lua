@@ -60,7 +60,7 @@ replacer.inspect = function(_, user, pointed_thing, mode)
 					sdata = minetest.deserialize(sdata) or {}
 					if sdata.itemstring then
 						text = text .. ' [' .. sdata.itemstring .. ']'
-						if show_receipe then
+						if show_recipe then
 							-- the fields part is used here to provide
 							-- additional information about the entity
 							replacer.inspect_show_crafting(
@@ -166,7 +166,7 @@ replacer.image_button_link = function(stack_string)
 	return stack_string .. ';' .. new_node_name .. ';' .. group
 end
 
-replacer.add_circular_saw_receipe = function(node_name, receipes)
+replacer.add_circular_saw_recipe = function(node_name, recipes)
 	if not node_name
 		or not minetest.get_modpath('moreblocks')
 		or not circular_saw or not circular_saw.names
@@ -193,18 +193,18 @@ replacer.add_circular_saw_receipe = function(node_name, receipes)
 	help[1] = 'default'
 	local basic_node_name = help[1] .. ':' .. help2[2]
 	-- node found that fits into the saw
-	receipes[#receipes + 1] = {
+	recipes[#recipes + 1] = {
 		method = 'saw',
 		type = 'saw',
 		items = { basic_node_name },
 		output = node_name
 	}
-	return receipes
+	return recipes
 end
 
 
-replacer.add_colormachine_receipe = function(node_name, receipes)
-	if not minetest.get_modpath('colormachine') or not colormachine then
+replacer.add_colormachine_recipe = function(node_name, recipes)
+	if not replacer.has_colormachine_mod then
 		return
 	end
 	local res = colormachine.get_node_name_painted(node_name, '')
@@ -213,13 +213,13 @@ replacer.add_colormachine_receipe = function(node_name, receipes)
 		return
 	end
 	-- paintable node found
-	receipes[#receipes + 1] = {
+	recipes[#recipes + 1] = {
 		method = 'colormachine',
 		type = 'colormachine',
 		items = { res.possible[1] },
 		output = node_name
 	}
-	return receipes
+	return recipes
 end
 
 
@@ -227,17 +227,16 @@ replacer.inspect_show_crafting = function(name, node_name, fields)
 	if not name then
 		return
 	end
-
-	local receipe_nr = 1
+	local recipe_nr = 1
 	if not node_name then
 		node_name  = fields.node_name
-		receipe_nr = tonumber(fields.receipe_nr)
+		recipe_nr = tonumber(fields.recipe_nr)
 	end
 	-- turn it into an item stack so that we can handle dropped stacks etc
 	local stack = ItemStack(node_name)
 	node_name = stack:get_name()
 
-	-- the player may ask for receipes of indigrents to the current receipe
+	-- the player may ask for recipes of indigrents to the current recipe
 	if fields then
 		for k, v in pairs(fields) do
 			if v and '' == v
@@ -247,7 +246,7 @@ replacer.inspect_show_crafting = function(name, node_name, fields)
 				or minetest.registered_tools[k]
 			then
 				node_name = k
-				receipe_nr = 1
+				recipe_nr = 1
 			end
 		end
 	end
@@ -256,15 +255,15 @@ replacer.inspect_show_crafting = function(name, node_name, fields)
 	if not res then
 		res = {}
 	end
-	-- add special receipes for nodes created by machines
-	replacer.add_circular_saw_receipe(node_name, res)
-	replacer.add_colormachine_receipe(node_name, res)
+	-- add special recipes for nodes created by machines
+	replacer.add_circular_saw_recipe(node_name, res)
+	replacer.add_colormachine_recipe(node_name, res)
 
-	-- offer all alternate creafting receipes thrugh prev/next buttons
-	if fields and fields.prev_receipe and 1 < receipe_nr then
-		receipe_nr = receipe_nr - 1
-	elseif fields and fields.next_receipe and receipe_nr < #res then
-		receipe_nr = receipe_nr + 1
+	-- offer all alternate creafting recipes thrugh prev/next buttons
+	if fields and fields.prev_recipe and 1 < recipe_nr then
+		recipe_nr = recipe_nr - 1
+	elseif fields and fields.next_recipe and recipe_nr < #res then
+		recipe_nr = recipe_nr + 1
 	end
 
 	local desc = ' - no description provided - '
@@ -298,7 +297,7 @@ replacer.inspect_show_crafting = function(name, node_name, fields)
 		 -- invisible field for passing on information
 		.. 'field[20,20;0.1,0.1;node_name;node_name;' .. node_name .. ']'
 		-- another invisible field
-		.. 'field[21,21;0.1,0.1;receipe_nr;receipe_nr;' .. tostring(receipe_nr) .. ']'
+		.. 'field[21,21;0.1,0.1;recipe_nr;recipe_nr;' .. tostring(recipe_nr) .. ']'
 
 	-- provide additional information regarding the node in particular
 	-- that has been inspected
@@ -322,17 +321,17 @@ replacer.inspect_show_crafting = function(name, node_name, fields)
 			.. minetest.formspec_escape(fields.protected_info) .. ']'
 	end
 
-	if #res < receipe_nr or 1 > receipe_nr then
-		receipe_nr = 1
+	if #res < recipe_nr or 1 > recipe_nr then
+		recipe_nr = 1
 	end
-	if 1 < receipe_nr then
-		formspec = formspec .. 'button[3.8,5;1,0.5;prev_receipe;prev]'
+	if 1 < recipe_nr then
+		formspec = formspec .. 'button[3.8,5;1,0.5;prev_recipe;prev]'
 	end
-	if #res > receipe_nr then
-		formspec = formspec .. 'button[5.0,5.0;1,0.5;next_receipe;next]'
+	if #res > recipe_nr then
+		formspec = formspec .. 'button[5.0,5.0;1,0.5;next_recipe;next]'
 	end
 	if 1 > #res then
-		formspec = formspec .. 'label[3,1;No receipes.]'
+		formspec = formspec .. 'label[3,1;No recipes.]'
 		if minetest.registered_nodes[node_name]
 			and minetest.registered_nodes[node_name].drop
 		then
@@ -361,71 +360,71 @@ replacer.inspect_show_crafting = function(name, node_name, fields)
 			end
 		end
 	else
-		formspec = formspec .. 'label[1,5;Alternate ' .. tostring(receipe_nr)
+		formspec = formspec .. 'label[1,5;Alternate ' .. tostring(recipe_nr)
 			.. '/' .. tostring(#res) .. ']'
-		-- reverse order; default receipes (and thus the most intresting ones)
+		-- reverse order; default recipes (and thus the most intresting ones)
 		-- are usually the oldest
-		local receipe = res[#res + 1 - receipe_nr]
-		if 'normal' == receipe.type and receipe.items then
-			local width = receipe.width
+		local recipe = res[#res + 1 - recipe_nr]
+		if 'normal' == recipe.type and recipe.items then
+			local width = recipe.width
 			if not width or 0 == width then
 				width = 3
 			end
 			for i = 1, 9 do
-				if receipe.items[i] then
+				if recipe.items[i] then
 					formspec = formspec .. 'item_image_button['
 						.. (((i - 1) % width) + 1) .. ','
 						.. tostring(math.floor((i - 1) / width) + 1)
 						.. ';1.0,1.0;'
-						.. replacer.image_button_link(receipe.items[i]) .. ']'
+						.. replacer.image_button_link(recipe.items[i]) .. ']'
 				end
 			end
-		elseif 'cooking' == receipe.type
-			and receipe.items
-			and 1 == #receipe.items
-			and '' == receipe.output
+		elseif 'cooking' == recipe.type
+			and recipe.items
+			and 1 == #recipe.items
+			and '' == recipe.output
 		then
 			formspec = formspec .. 'item_image_button[1,1;3.4,3.4;'
 				.. replacer.image_button_link('default:furnace_active') .. ']'
 				.. 'item_image_button[2.9,2.7;1.0,1.0;'
-				.. replacer.image_button_link(receipe.items[1]) .. ']'
-				.. 'label[1.0,0;' .. tostring(receipe.items[1]) .. ']'
+				.. replacer.image_button_link(recipe.items[1]) .. ']'
+				.. 'label[1.0,0;' .. tostring(recipe.items[1]) .. ']'
 				.. 'label[0,0.5;This can be used as a fuel.' .. ']'
-		elseif 'cooking' == receipe.type
-			and receipe.items
-			and 1 == #receipe.items
+		elseif 'cooking' == recipe.type
+			and recipe.items
+			and 1 == #recipe.items
 		then
 			formspec = formspec .. 'item_image_button[1,1;3.4,3.4;'
 				.. replacer.image_button_link('default:furnace') .. ']'
 				.. 'item_image_button[2.9,2.7;1.0,1.0;'
-				.. replacer.image_button_link(receipe.items[1]) .. ']'
-		elseif 'colormachine' == receipe.type
-			and receipe.items
-			and 1 == #receipe.items
+				.. replacer.image_button_link(recipe.items[1]) .. ']'
+		elseif 'colormachine' == recipe.type
+			and recipe.items
+			and 1 == #recipe.items
 		then
 			formspec = formspec .. 'item_image_button[1,1;3.4,3.4;'
 				.. replacer.image_button_link('colormachine:colormachine') .. ']'
 				.. 'item_image_button[2,2;1.0,1.0;'
-				.. replacer.image_button_link(receipe.items[1]) .. ']'
-		elseif 'saw' == receipe.type
-			and receipe.items
-			and 1 == #receipe.items
+				.. replacer.image_button_link(recipe.items[1]) .. ']'
+		elseif 'saw' == recipe.type
+			and recipe.items
+			and 1 == #recipe.items
 		then
 			formspec = formspec .. 'item_image_button[1,1;3.4,3.4;'
 				.. replacer.image_button_link('moreblocks:circular_saw') .. ']'
 				.. 'item_image_button[2,0.6;1.0,1.0;'
-				.. replacer.image_button_link(receipe.items[1]) .. ']'
+				.. replacer.image_button_link(recipe.items[1]) .. ']'
 		else
-			formspec = formspec .. 'label[3,1;Error: Unkown receipe.]'
+			formspec = formspec .. 'label[3,1;Error: Unkown recipe.]'
 		end
-		-- show how many of the items the receipe will yield
-		local outstack = ItemStack(receipe.output)
+		-- show how many of the items the recipe will yield
+		local outstack = ItemStack(recipe.output)
 		local out_count = outstack:get_count()
 		if 1 < out_count then
 			formspec = formspec .. 'label[5.5,2.5;' .. tostring(out_count) .. ']'
 		end
 	end
-	minetest.show_formspec(name, 'replacer:crafting', formspec)
+	minetest.show_formspec(player_name, 'replacer:crafting', formspec)
 end
 
 -- translate general formspec calls back to specific calls
