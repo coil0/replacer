@@ -137,7 +137,7 @@ replacer.group_placeholder['group:wool'] = 'wool:white'
 
 
 -- handle the standard dye color groups
-if minetest.get_modpath('dye') and dye and dye.basecolors then
+if replacer.has_basic_dyes then
 	for i, color in ipairs(dye.basecolors) do
 		local def = minetest.registered_items['dye:' .. color]
 		if def and def.groups then
@@ -168,8 +168,7 @@ end
 
 replacer.add_circular_saw_recipe = function(node_name, recipes)
 	if not node_name
-		or not minetest.get_modpath('moreblocks')
-		or not circular_saw or not circular_saw.names
+		or not replacer.has_circular_saw
 		or 'moreblocks:circular_saw' == node_name
 	then
 		return

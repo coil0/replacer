@@ -89,6 +89,13 @@ if nil == replacer.hide_recipe_technic_direct then
 	replacer.hide_recipe_technic_direct = true
 end
 
+replacer.has_basic_dyes = minetest.get_modpath('dye')
+								and minetest.global_exists('dye')
+								and dye.basecolors
+replacer.has_circular_saw = minetest.get_modpath('moreblocks')
+								and minetest.global_exists('moreblocks')
+								and minetest.global_exists('circular_saw')
+								and circular_saw.names
 replacer.has_colormachine_mod = minetest.get_modpath('colormachine')
 								and minetest.global_exists('colormachine')
 replacer.has_technic_mod = minetest.get_modpath('technic')
