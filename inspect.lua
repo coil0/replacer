@@ -51,6 +51,7 @@ replacer.inspect = function(_, user, pointed_thing, mode)
 	local keys = user:get_player_control()
 
 	if 'object' == pointed_thing.type then
+		local inventory_text = nil
 		local text = 'This is '
 		local ref = pointed_thing.ref
 		if not ref then
@@ -84,9 +85,37 @@ replacer.inspect = function(_, user, pointed_thing, mode)
 					if sdata.owner then
 						text = text .. ' owned'
 						if true == sdata.protected then
-							text = text .. ' and protected'
+							if true == sdata.locked then
+								text = text .. ', protected and locked'
+							else
+								text = text .. ' and protected'
+							end
+						else
+							if true == sdata.locked then
+								text = text .. ' and locked'
+							end
 						end
 						text = text .. ' by ' .. sdata.owner
+					end
+					if 'string' == type(sdata.order) then
+						text = text .. ' with order to ' .. sdata.order
+					end
+					if 'table' == type(sdata.inv) then
+						local item_count = 0
+						local type_count = 0
+						for k, v in pairs(sdata.inv) do
+							type_count = type_count + 1
+							item_count = item_count + v
+						end
+						if 0 < type_count then
+							inventory_text = '\nHas '
+							if 1 < type_count then
+								inventory_text = inventory_text .. type_count
+										.. ' different types of items, '
+							end
+							inventory_text = inventory_text .. 'total of '
+									.. item_count .. ' items in inventory.'
+						end
 					end
 				end
 			elseif luaob then
@@ -99,6 +128,7 @@ replacer.inspect = function(_, user, pointed_thing, mode)
 		if ref then
 			text = text .. ' at ' .. nice_pos_string(ref:getpos())
 		end
+		if inventory_text then text = text .. inventory_text end
 		minetest.chat_send_player(name, text)
 		return nil
 	elseif 'node' ~= pointed_thing.type then
