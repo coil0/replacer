@@ -81,6 +81,13 @@ replacer.inspect = function(_, user, pointed_thing, mode)
 							.. tostring(math.floor(sdata.age / 60))
 							.. ' minutes ago'
 					end
+					if sdata.owner then
+						text = text .. ' owned'
+						if true == sdata.protected then
+							text = text .. ' and protected'
+						end
+						text = text .. ' by ' .. sdata.owner
+					end
 				end
 			elseif luaob then
 				text = text .. 'an object "' .. luaob.name .. '"'
