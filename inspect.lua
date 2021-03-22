@@ -35,6 +35,13 @@ minetest.register_tool('replacer:inspect', {
 	end,
 })
 
+local function nice_pos_string(pos)
+	local no_info = '<no positional information>'
+	if 'table' ~= type(pos) then return no_info end
+	if not (pos.x and pos.y and pos.z) then return no_info end
+	pos = { x = math.floor(pos.x), y = math.floor(pos.y), z = math.floor(pos.z) }
+	return minetest.pos_to_string(pos)
+end
 
 replacer.inspect = function(_, user, pointed_thing, mode)
 	if nil == user or nil == pointed_thing then
@@ -82,7 +89,9 @@ replacer.inspect = function(_, user, pointed_thing, mode)
 			end
 
 		end
-		text = text .. ' at ' .. minetest.pos_to_string(ref:getpos())
+		if ref then
+			text = text .. ' at ' .. nice_pos_string(ref:getpos())
+		end
 		minetest.chat_send_player(name, text)
 		return nil
 	elseif 'node' ~= pointed_thing.type then
