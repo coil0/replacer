@@ -27,12 +27,12 @@ minetest.register_tool('replacer:inspect', {
 	liquids_pointable = true, -- it is ok to request information about liquids
 
 	on_use = function(itemstack, user, pointed_thing)
-	   return replacer.inspect(itemstack, user, pointed_thing)
-    end,
+		return replacer.inspect(itemstack, user, pointed_thing)
+	end,
 
-    on_place = function(itemstack, placer, pointed_thing)
-	   return replacer.inspect(itemstack, placer, pointed_thing)
-    end,
+	on_place = function(itemstack, placer, pointed_thing)
+		return replacer.inspect(itemstack, placer, pointed_thing)
+	end,
 })
 
 
